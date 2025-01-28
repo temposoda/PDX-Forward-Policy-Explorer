@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Papa from "papaparse";
 import _ from "lodash";
+import DomainMultiSelect, { type DomainFilterMode } from "./MultiSelect";
 
 const SHEET_ID = "1wGJeSwToqQp7Mg-77TYRzBlrTRsoECJg0QUMDXU3Q_4";
 
@@ -21,11 +22,11 @@ const FISCAL_IMPACTS = [
   { id: "all", name: "All Budgets", emoji: "🔍" },
   { id: "revenue_neutral", name: "Revenue Neutral", emoji: "⚖️" },
   { id: "cost_saving", name: "Cost Saving", emoji: "💎" },
-  { id: "net_cost", name: "Net Cost", emoji: "💸" },
+  { id: "needs_revenue", name: "Needs Revenue", emoji: "🤌" },
 ] as const;
 
-const DOMAINS = [
-  { id: "all", name: "All Policy Areas", emoji: "🔍" },
+export const DOMAINS = [
+  { id: "all", name: "Policy Areas", emoji: "🔍" },
   { id: "housing", name: "Housing", emoji: "🏘️" },
   { id: "environment", name: "Environment", emoji: "🌱" },
   { id: "safety", name: "Safety", emoji: "🛡️" },
@@ -43,7 +44,7 @@ const DOMAINS = [
 type SheetName = (typeof SHEETS)[keyof typeof SHEETS];
 type CostCategory = (typeof COST_CATEGORIES)[number]["id"];
 type FiscalImpact = (typeof FISCAL_IMPACTS)[number]["id"];
-type DomainId = (typeof DOMAINS)[number]["id"];
+export type DomainId = (typeof DOMAINS)[number]["id"];
 
 interface Policy {
   policy_id: string;
@@ -59,7 +60,7 @@ interface PolicyDomain {
   domain_id: string;
 }
 
-type DomainMap = {
+export type DomainMap = {
   [key: string]: DomainId[];
 };
 
@@ -97,12 +98,18 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({
 const PolicyExplorer: React.FC = () => {
   // Parse initial state from URL parameters
   const params = new URLSearchParams(window.location.search);
+  const initialDomains = (params.get("domains")?.split(",") as DomainId[]) || [
+    "all",
+  ];
+  const initialDomainMode =
+    (params.get("domainMode") as DomainFilterMode) || "ANY";
 
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [policyDomains, setPolicyDomains] = useState<DomainMap>({});
-  const [selectedDomain, setSelectedDomain] = useState<DomainId>(
-    (params.get("domain") as DomainId) || "all"
-  );
+  const [selectedDomains, setSelectedDomains] =
+    useState<DomainId[]>(initialDomains);
+  const [domainFilterMode, setDomainFilterMode] =
+    useState<DomainFilterMode>(initialDomainMode);
   const [selectedCost, setSelectedCost] = useState<CostCategory>(
     (params.get("cost") as CostCategory) || "all"
   );
@@ -117,7 +124,10 @@ const PolicyExplorer: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams();
 
-    if (selectedDomain !== "all") params.set("domain", selectedDomain);
+    if (selectedDomains[0] !== "all") {
+      params.set("domains", selectedDomains.join(","));
+      params.set("domainMode", domainFilterMode);
+    }
     if (selectedCost !== "all") params.set("cost", selectedCost);
     if (selectedImpact !== "all") params.set("impact", selectedImpact);
     if (searchQuery) params.set("q", searchQuery);
@@ -127,7 +137,13 @@ const PolicyExplorer: React.FC = () => {
       : window.location.pathname;
 
     window.history.replaceState({}, "", newUrl);
-  }, [selectedDomain, selectedCost, selectedImpact, searchQuery]);
+  }, [
+    selectedDomains,
+    domainFilterMode,
+    selectedCost,
+    selectedImpact,
+    searchQuery,
+  ]);
 
   useEffect(() => {
     const fetchSheet = async (sheetName: SheetName) => {
@@ -194,11 +210,13 @@ const PolicyExplorer: React.FC = () => {
         selectedImpact === "all" ||
         policy.fiscal_impact_category === selectedImpact;
 
+      // Domain filtering with ANY/ALL logic
       const policyDomainList = policyDomains[policy.policy_id] || [];
       const matchesDomain =
-        selectedDomain === "all" ||
-        (policyDomainList &&
-          policyDomainList.some((d) => d === selectedDomain));
+        selectedDomains[0] === "all" ||
+        (domainFilterMode === "ANY"
+          ? selectedDomains.some((d) => policyDomainList.includes(d))
+          : selectedDomains.every((d) => policyDomainList.includes(d)));
 
       const searchText = searchQuery.toLowerCase();
       const matchesSearch =
@@ -212,22 +230,23 @@ const PolicyExplorer: React.FC = () => {
   }, [
     policies,
     policyDomains,
+    selectedDomains,
+    domainFilterMode,
     selectedCost,
     selectedImpact,
-    selectedDomain,
     searchQuery,
   ]);
 
   const getDomainColor = (domain: DomainId): string => {
     const colors: Record<Exclude<DomainId, "all">, string> = {
-      housing: "bg-red-100 text-red-800",
-      environment: "bg-orange-100 text-orange-800",
+      housing: "bg-pink-100 text-pink-800",
+      environment: "bg-green-100 text-green-800",
       safety: "bg-yellow-100 text-yellow-800",
-      democracy: "bg-green-100 text-green-800",
-      "economic-development": "bg-blue-100 text-blue-800",
+      democracy: "bg-blue-100 text-blue-800",
+      "economic-development": "bg-orange-100 text-orange-800",
       "infrastructure-and-transportation": "bg-indigo-100 text-indigo-800",
       "social-services": "bg-purple-100 text-purple-800",
-      "public-health": "bg-gray-100 text-gray-800",
+      "public-health": "bg-red-100 text-red-800",
     };
 
     return (
@@ -277,19 +296,38 @@ const PolicyExplorer: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap gap-4">
-          {/* Domain Filter */}
-          <select
-            value={selectedDomain}
-            onChange={(e) => setSelectedDomain(e.target.value as DomainId)}
-            className="block w-[200px] rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-          >
-            {DOMAINS.map((domain) => (
-              <option key={domain.id} value={domain.id}>
-                {domain.emoji} {domain.name}
-              </option>
-            ))}
-          </select>
+          {/* Domain Filter with AND/OR toggle */}
+          <div className="flex gap-2 items-center">
+            <div className="flex items-center border rounded-md overflow-hidden">
+              <button
+                onClick={() => setDomainFilterMode("ANY")}
+                className={`px-3 py-2 text-sm ${
+                  domainFilterMode === "ANY"
+                    ? "bg-blue-100 text-blue-800"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                ANY
+              </button>
+              <button
+                onClick={() => setDomainFilterMode("ALL")}
+                className={`px-3 py-2 text-sm border-l ${
+                  domainFilterMode === "ALL"
+                    ? "bg-blue-100 text-blue-800"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                ALL
+              </button>
+            </div>
+            <span>of these</span>
+            <DomainMultiSelect
+              selected={selectedDomains}
+              onChange={setSelectedDomains}
+            />
+          </div>
 
+          <span className="border "> </span>
           {/* Cost Filter */}
           <select
             value={selectedCost}
@@ -316,20 +354,21 @@ const PolicyExplorer: React.FC = () => {
             ))}
           </select>
 
-          {/* Reset button - only show if any filters are active */}
-          {(selectedDomain !== "all" ||
+          {/* Reset button - updated to include new domain filters */}
+          {(selectedDomains[0] !== "all" ||
             selectedCost !== "all" ||
             selectedImpact !== "all" ||
             searchQuery !== "") && (
             <button
               onClick={() => {
-                setSelectedDomain("all");
+                setSelectedDomains(["all"]);
+                setDomainFilterMode("ANY");
                 setSelectedCost("all");
                 setSelectedImpact("all");
                 setSearchQuery("");
                 window.history.replaceState({}, "", window.location.pathname);
               }}
-              className="px-4 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md border border-red-200 transition-colors"
+              className="px-4 py-2 text text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md border border-red-200 transition-colors"
             >
               🔄 Reset Filters
             </button>
