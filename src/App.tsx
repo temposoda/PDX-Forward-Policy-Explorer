@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Papa from "papaparse";
 import _ from "lodash";
 import DomainMultiSelect, { type DomainFilterMode } from "./MultiSelect";
+import { Analytics } from "@vercel/analytics/react";
 
 const SHEET_ID = "1wGJeSwToqQp7Mg-77TYRzBlrTRsoECJg0QUMDXU3Q_4";
 
@@ -275,6 +276,7 @@ const PolicyExplorer: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-4">
+      <Analytics />
       <header className="mb-8">
         <h1 className="text-3xl font-bold mb-2">PDX Forward Policy Explorer</h1>
         <p className="text-gray-600">
@@ -336,7 +338,7 @@ const PolicyExplorer: React.FC = () => {
           >
             {COST_CATEGORIES.map((category) => (
               <option key={category.id} value={category.id}>
-                {category.emoji} {category.name}
+                {category.emoji || "🤔"} {category.name}
               </option>
             ))}
           </select>
@@ -349,7 +351,7 @@ const PolicyExplorer: React.FC = () => {
           >
             {FISCAL_IMPACTS.map((impact) => (
               <option key={impact.id} value={impact.id}>
-                {impact.emoji} {impact.name}
+                {impact.emoji || "🤔"} {impact.name}
               </option>
             ))}
           </select>
@@ -427,11 +429,9 @@ const PolicyExplorer: React.FC = () => {
                     Implementation Cost:
                   </h4>
                   <div className="flex items-center">
-                    {
-                      COST_CATEGORIES.find(
-                        (c) => c.id === policy.implementation_cost_category
-                      )?.emoji
-                    }
+                    {COST_CATEGORIES.find(
+                      (c) => c.id === policy.implementation_cost_category
+                    )?.emoji || "🤔"}
                     <span className="ml-2 text-sm">
                       {_.startCase(policy.implementation_cost_category)}
                     </span>
@@ -443,11 +443,9 @@ const PolicyExplorer: React.FC = () => {
                     Impact on City Budget:
                   </h4>
                   <div className="flex items-center">
-                    {
-                      FISCAL_IMPACTS.find(
-                        (f) => f.id === policy.fiscal_impact_category
-                      )?.emoji
-                    }
+                    {FISCAL_IMPACTS.find(
+                      (f) => f.id === policy.fiscal_impact_category
+                    )?.emoji || "🤔"}
                     <span className="ml-2 text-sm">
                       {_.startCase(policy.fiscal_impact_category)}
                     </span>
