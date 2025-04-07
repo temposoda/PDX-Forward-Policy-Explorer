@@ -40,6 +40,7 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
   isOpen,
   onClose,
   policyDomains,
+
   getDomainColor,
 }) => {
   // Add effect for escape key
@@ -60,23 +61,44 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
   const renderStakeholders = (stakeholdersString: string) => {
     if (!stakeholdersString) return null;
     
-    const categories = stakeholdersString
-      .split(';')
-      .filter(Boolean)
-      .map(category => {
-        const [name, stakeholdersStr] = category.split(':');
-        return {
-          name: name.trim(),
-          stakeholders: stakeholdersStr
-            .split(',')
-            .map(s => s.trim())
-            .filter(Boolean)
-        };
+    // Create a more robust regex pattern for categories
+    const categoryMatches = stakeholdersString.match(/[A-Z][a-zA-Z\s&amp;]+:/g) || [];
+    
+    if (categoryMatches.length === 0) {
+      // Simple fallback if no categories detected
+      return <p>{stakeholdersString}</p>;
+    }
+    
+    // Create segments by splitting at each category
+    const categorySegments: {name: string; stakeholders: string[]}[] = [];
+    
+    categoryMatches.forEach((categoryMatch, index) => {
+      const categoryName = categoryMatch.slice(0, -1); // Remove the colon
+      
+      // Find start and end positions
+      const startPos = stakeholdersString.indexOf(categoryMatch) + categoryMatch.length;
+      const endPos = index < categoryMatches.length - 1 
+        ? stakeholdersString.indexOf(categoryMatches[index + 1])
+        : stakeholdersString.length;
+      
+      // Extract content
+      const content = stakeholdersString.substring(startPos, endPos).trim();
+      
+      // Split by semicolons
+      const stakeholdersList = content
+        .split(';')
+        .map(item => item.trim())
+        .filter(Boolean);
+      
+      categorySegments.push({
+        name: categoryName,
+        stakeholders: stakeholdersList
       });
+    });
     
     return (
-      <>
-        {categories.map(category => (
+      <div className="space-y-4">
+        {categorySegments.map(category => (
           <div key={category.name} className="mb-3 last:mb-0">
             <h4 className="text-sm font-semibold mb-1">{category.name}</h4>
             <ul className="pl-4">
@@ -88,35 +110,67 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
             </ul>
           </div>
         ))}
-      </>
+      </div>
     );
   };
 
-  // Helper function to render evidence base with paragraphs
+  // Helper function to render evidence base with markdown
   const renderEvidenceBase = (evidenceBase: string) => {
     if (!evidenceBase) return null;
     
-    return (
-      <>
-        {evidenceBase.split('\n\n').map((paragraph, idx) => (
-          <p key={idx} className={idx > 0 ? 'mt-2' : ''}>
-            {paragraph}
-          </p>
-        ))}
-      </>
-    );
+    // Handle markdown-like formatting
+    const formattedText = evidenceBase
+      // Replace **Text** with bold
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      // Handle paragraph breaks
+      .split('\n\n')
+      .map((paragraph, i) => (
+        <p key={i} className={i > 0 ? 'mt-3' : ''} 
+           dangerouslySetInnerHTML={{ __html: paragraph }} />
+      ));
+    
+    return <div className="space-y-3">{formattedText}</div>;
   };
   
-  // Helper function to render implementation challenges
+  // Helper function to render implementation challenges with colors
   const renderChallenges = (challenges: string) => {
     if (!challenges) return null;
     
+    // Define challenge severity colors
+    const getChallengeColor = (index: number): string => {
+      const colors = [
+        "bg-orange-500", // High priority
+        "bg-yellow-500", // Medium priority
+        "bg-blue-500"    // Low priority
+      ];
+      return colors[index % colors.length];
+    };
+    
+    const challengeItems = challenges
+      .split(';')
+      .map(c => c.trim())
+      .filter(Boolean);
+    
     return (
       <>
-        {challenges.split(';').filter(Boolean).map((challenge, idx) => (
+        {/* Challenge color legend */}
+        <div className="mb-3 flex items-center text-xs text-gray-600">
+          <span className="mr-3 flex items-center">
+            <span className="inline-block w-2 h-2 rounded-full bg-orange-500 mr-1"></span> High priority
+          </span>
+          <span className="mr-3 flex items-center">
+            <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-1"></span> Medium priority
+          </span>
+          <span className="flex items-center">
+            <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1"></span> Low priority
+          </span>
+        </div>
+        
+        {/* Challenge items */}
+        {challengeItems.map((challenge, idx) => (
           <div key={idx} className={`flex items-start ${idx > 0 ? 'mt-3' : ''}`}>
-            <div className="flex-shrink-0 w-2 h-2 mt-1.5 mr-2 rounded-full bg-orange-500"></div>
-            <div>{challenge.trim()}</div>
+            <div className={`flex-shrink-0 w-2 h-2 mt-1.5 mr-2 rounded-full ${getChallengeColor(idx)}`}></div>
+            <div>{challenge}</div>
           </div>
         ))}
       </>
