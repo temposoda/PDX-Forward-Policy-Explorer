@@ -3,6 +3,8 @@ import Papa from "papaparse";
 import _ from "lodash";
 import DomainMultiSelect, { type DomainFilterMode } from "./MultiSelect";
 import { Analytics } from "@vercel/analytics/react";
+import PolicyDetailModal, { Policy } from "./PolicyDetailModal";
+import {  DOMAINS, DomainId, FISCAL_IMPACTS, COST_CATEGORIES, CostCategory, DomainMap, FiscalImpact } from "./lib/constants";
 
 const SHEET_ID = "1wGJeSwToqQp7Mg-77TYRzBlrTRsoECJg0QUMDXU3Q_4";
 
@@ -11,59 +13,8 @@ const SHEETS = {
   policyDomains: "Policy_Domains",
 } as const;
 
-const COST_CATEGORIES = [
-  { id: "all", name: "All Costs", emoji: "🔍" },
-  { id: "none", name: "No Cost", emoji: "🆓" },
-  { id: "minimal", name: "Minimal Cost", emoji: "💰" },
-  { id: "moderate", name: "Moderate Cost", emoji: "💰💰" },
-  { id: "substantial", name: "Substantial Cost", emoji: "💰💰💰" },
-] as const;
-
-const FISCAL_IMPACTS = [
-  { id: "all", name: "All Budgets", emoji: "🔍" },
-  { id: "revenue_neutral", name: "Revenue Neutral", emoji: "⚖️" },
-  { id: "cost_saving", name: "Cost Saving", emoji: "💎" },
-  { id: "needs_revenue", name: "Needs Revenue", emoji: "🤌" },
-] as const;
-
-export const DOMAINS = [
-  { id: "all", name: "Policy Areas", emoji: "🔍" },
-  { id: "housing", name: "Housing", emoji: "🏘️" },
-  { id: "environment", name: "Environment", emoji: "🌱" },
-  { id: "safety", name: "Safety", emoji: "🛡️" },
-  { id: "democracy", name: "Democracy", emoji: "🗳️" },
-  { id: "economic-development", name: "Economic Development", emoji: "📈" },
-  {
-    id: "infrastructure-and-transportation",
-    name: "Infrastructure & Transportation",
-    emoji: "🚌",
-  },
-  { id: "social-services", name: "Social Services", emoji: "🤝" },
-  { id: "public-health", name: "Public Health", emoji: "⚕️" },
-] as const;
-
 type SheetName = (typeof SHEETS)[keyof typeof SHEETS];
-type CostCategory = (typeof COST_CATEGORIES)[number]["id"];
-type FiscalImpact = (typeof FISCAL_IMPACTS)[number]["id"];
-export type DomainId = (typeof DOMAINS)[number]["id"];
 
-interface Policy {
-  policy_id: string;
-  title: string;
-  summary?: string;
-  description?: string;
-  implementation_cost_category: Exclude<CostCategory, "all">;
-  fiscal_impact_category: Exclude<FiscalImpact, "all">;
-}
-
-interface PolicyDomain {
-  policy_id: string;
-  domain_id: string;
-}
-
-export type DomainMap = {
-  [key: string]: DomainId[];
-};
 
 interface HighlightedTextProps {
   text: string;
@@ -120,6 +71,20 @@ const PolicyExplorer: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(params.get("q") || "");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // New state for modal
+  const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // Modal handlers
+  const openPolicyDetails = (policy: Policy) => {
+    setSelectedPolicy(policy);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
 
   // Update URL when filters change
   useEffect(() => {
@@ -385,12 +350,19 @@ const PolicyExplorer: React.FC = () => {
             className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
           >
             <div className="p-4">
+              {/* Linked title */}
               <h3 className="text-lg font-semibold mb-2">
-                <HighlightedText
-                  text={policy.title}
-                  searchQuery={searchQuery}
-                />
+                <button 
+                  className="text-blue-600 hover:text-blue-800 hover:underline text-left"
+                  onClick={() => openPolicyDetails(policy)}
+                >
+                  <HighlightedText
+                    text={policy.title}
+                    searchQuery={searchQuery}
+                  />
+                </button>
               </h3>
+              
               <p className="text-gray-600 mb-4">
                 <HighlightedText
                   text={policy.summary || policy.description || ""}
@@ -462,8 +434,23 @@ const PolicyExplorer: React.FC = () => {
           No policies found matching the selected filters.
         </div>
       )}
+
+      {/* Policy Detail Modal */}
+      <PolicyDetailModal 
+        policy={selectedPolicy}
+        isOpen={modalOpen}
+        onClose={closeModal}
+        policyDomains={policyDomains}
+        getDomainColor={getDomainColor}
+      />
     </div>
   );
 };
 
 export default PolicyExplorer;
+
+// Helper interface that you might need to define
+interface PolicyDomain {
+  policy_id: string;
+  domain_id: string;
+}

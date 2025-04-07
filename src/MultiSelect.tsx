@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 
 export type DomainFilterMode = "ANY" | "ALL";
-import { DomainId, DOMAINS } from "./App";
+import {  DomainId, DOMAINS } from "./lib/constants";
+
 // Add new multi-select dropdown component
 interface MultiSelectProps {
   selected: DomainId[];
