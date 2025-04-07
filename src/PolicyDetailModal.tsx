@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
-import {  COST_CATEGORIES, DOMAINS, DomainId, FISCAL_IMPACTS } from "./lib/constants";
 import { X } from "lucide-react";
 import _ from "lodash";
-
+import * as Constants from './lib/constants'
 
 // Define the types based on your existing data structure
 export interface Policy {
@@ -18,7 +17,7 @@ export interface Policy {
 }
 
 interface DomainMap {
-  [key: string]: DomainId[];
+  [key: string]: Constants.DomainId[];
 }
 
 // Types for the categories from your App.tsx
@@ -33,7 +32,7 @@ interface PolicyDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   policyDomains: DomainMap;
-  getDomainColor: (domain: DomainId) => string;
+  getDomainColor: (domain: Constants.DomainId) => string;
 }
 
 const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
@@ -56,6 +55,73 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
       window.removeEventListener("keydown", handleEsc);
     };
   }, [onClose]);
+  
+  // Helper function to render stakeholders with categories
+  const renderStakeholders = (stakeholdersString: string) => {
+    if (!stakeholdersString) return null;
+    
+    const categories = stakeholdersString
+      .split(';')
+      .filter(Boolean)
+      .map(category => {
+        const [name, stakeholdersStr] = category.split(':');
+        return {
+          name: name.trim(),
+          stakeholders: stakeholdersStr
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean)
+        };
+      });
+    
+    return (
+      <>
+        {categories.map(category => (
+          <div key={category.name} className="mb-3 last:mb-0">
+            <h4 className="text-sm font-semibold mb-1">{category.name}</h4>
+            <ul className="pl-4">
+              {category.stakeholders.map((stakeholder, index) => (
+                <li key={`${category.name}-${index}`} className="flex items-start mb-1">
+                  <span className="mr-2">•</span> {stakeholder}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </>
+    );
+  };
+
+  // Helper function to render evidence base with paragraphs
+  const renderEvidenceBase = (evidenceBase: string) => {
+    if (!evidenceBase) return null;
+    
+    return (
+      <>
+        {evidenceBase.split('\n\n').map((paragraph, idx) => (
+          <p key={idx} className={idx > 0 ? 'mt-2' : ''}>
+            {paragraph}
+          </p>
+        ))}
+      </>
+    );
+  };
+  
+  // Helper function to render implementation challenges
+  const renderChallenges = (challenges: string) => {
+    if (!challenges) return null;
+    
+    return (
+      <>
+        {challenges.split(';').filter(Boolean).map((challenge, idx) => (
+          <div key={idx} className={`flex items-start ${idx > 0 ? 'mt-3' : ''}`}>
+            <div className="flex-shrink-0 w-2 h-2 mt-1.5 mr-2 rounded-full bg-orange-500"></div>
+            <div>{challenge.trim()}</div>
+          </div>
+        ))}
+      </>
+    );
+  };
 
   if (!isOpen || !policy) return null;
 
@@ -88,7 +154,7 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
           <h3 className="text-lg font-medium mb-2">Policy Areas:</h3>
           <div className="flex flex-wrap gap-2">
             {(policyDomains[policy.policy_id] || []).map((domain) => {
-              const domainInfo = DOMAINS.find((d) => d.id === domain);
+              const domainInfo = Constants.DOMAINS.find((d) => d.id === domain);
               return domainInfo ? (
                 <span
                   key={domain}
@@ -106,7 +172,7 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
           <div>
             <h3 className="text-lg font-medium mb-2">Implementation Cost:</h3>
             <div className="flex items-center">
-              {COST_CATEGORIES.find(
+              {Constants.COST_CATEGORIES.find(
                 (c) => c.id === policy.implementation_cost_category
               )?.emoji || "🤔"}
               <span className="ml-2">
@@ -118,7 +184,7 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
           <div>
             <h3 className="text-lg font-medium mb-2">Impact on City Budget:</h3>
             <div className="flex items-center">
-              {FISCAL_IMPACTS.find(
+              {Constants.FISCAL_IMPACTS.find(
                 (f) => f.id === policy.fiscal_impact_category
               )?.emoji || "🤔"}
               <span className="ml-2">
@@ -132,8 +198,8 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
         {policy.evidence_base && (
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">Evidence Base</h3>
-            <div className="bg-gray-50 p-4 rounded-md">
-              <p>{policy.evidence_base}</p>
+            <div className="bg-gray-50 border border-gray-200 p-4 rounded-md">
+              {renderEvidenceBase(policy.evidence_base)}
             </div>
           </div>
         )}
@@ -142,8 +208,8 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
         {policy.stakeholders && (
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">Key Stakeholders</h3>
-            <div className="bg-gray-50 p-4 rounded-md">
-              <p>{policy.stakeholders}</p>
+            <div className="bg-gray-50 border border-gray-200 p-4 rounded-md">
+              {renderStakeholders(policy.stakeholders)}
             </div>
           </div>
         )}
@@ -152,8 +218,8 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
         {policy.implementation_challenges && (
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">Implementation Challenges</h3>
-            <div className="bg-gray-50 p-4 rounded-md">
-              <p>{policy.implementation_challenges}</p>
+            <div className="bg-gray-50 border border-gray-200 p-4 rounded-md">
+              {renderChallenges(policy.implementation_challenges)}
             </div>
           </div>
         )}

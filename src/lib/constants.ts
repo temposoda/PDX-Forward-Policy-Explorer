@@ -32,8 +32,13 @@ export const DOMAINS = [
   { id: "public-health", name: "Public Health", emoji: "⚕️" },
 ] as const;
 
+export const STAKEHOLDER_CATEGORIES = [
+    
+]
+
 export type CostCategory = (typeof COST_CATEGORIES)[number]["id"];
 export type FiscalImpact = (typeof FISCAL_IMPACTS)[number]["id"];
+export type StakeholderCategory = (typeof STAKEHOLDER_CATEGORIES)[number]["id"];
 export type DomainId = (typeof DOMAINS)[number]["id"];
 
 export type DomainMap = {
