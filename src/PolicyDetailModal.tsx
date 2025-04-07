@@ -114,23 +114,66 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
     );
   };
 
-  // Helper function to render evidence base with markdown
-  const renderEvidenceBase = (evidenceBase: string) => {
-    if (!evidenceBase) return null;
+// Helper function to render evidence base with markdown
+const renderEvidenceBase = (evidenceBase: string) => {
+  if (!evidenceBase) return null;
+  
+  // Parse into sections based on bold headings
+  const sections: {heading: string, content: string}[] = [];
+  
+  // Extract sections by looking for bold headings
+  const boldHeadingPattern = /\*\*([^:]+):\*\*/g;
+  let lastIndex = 0;
+  let match;
+  
+  // Reset lastIndex to ensure we start from the beginning
+  boldHeadingPattern.lastIndex = 0;
+  
+  while ((match = boldHeadingPattern.exec(evidenceBase)) !== null) {
+    const heading = match[1].trim();
+    const startContent = match.index + match[0].length;
     
-    // Handle markdown-like formatting
-    const formattedText = evidenceBase
-      // Replace **Text** with bold
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      // Handle paragraph breaks
-      .split('\n\n')
-      .map((paragraph, i) => (
-        <p key={i} className={i > 0 ? 'mt-3' : ''} 
-           dangerouslySetInnerHTML={{ __html: paragraph }} />
-      ));
+    // Find the end of this section (start of next section or end of string)
+    const nextMatch = boldHeadingPattern.exec(evidenceBase);
+    boldHeadingPattern.lastIndex = match.index + 1; // Reset to find next match
     
-    return <div className="space-y-3">{formattedText}</div>;
-  };
+    const endContent = nextMatch ? nextMatch.index : evidenceBase.length;
+    const content = evidenceBase.substring(startContent, endContent).trim();
+    
+    sections.push({ heading, content });
+    lastIndex = endContent;
+  }
+  
+  // If no sections were found, just render the whole thing
+  if (sections.length === 0) {
+    return (
+      <div>
+        {evidenceBase.split('\n').map((line, i) => (
+          <p key={i} className={i > 0 ? 'mt-2' : ''}>
+            {line}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  
+  return (
+    <div className="space-y-4">
+      {sections.map((section, i) => (
+        <div key={i}>
+          <p className="font-semibold">{section.heading}:</p>
+          <div className="mt-1 pl-4">
+            {section.content.split('\n').map((line, j) => (
+              <p key={j} className={j > 0 ? 'mt-1' : ''}>
+                {line}
+              </p>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
   
   // Helper function to render implementation challenges with colors
   const renderChallenges = (challenges: string) => {
@@ -156,13 +199,13 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
         {/* Challenge color legend */}
         <div className="mb-3 flex items-center text-xs text-gray-600">
           <span className="mr-3 flex items-center">
-            <span className="inline-block w-2 h-2 rounded-full bg-orange-500 mr-1"></span> High priority
+            <span className="inline-block w-2 h-2 rounded-full bg-orange-500 mr-1"></span> Significant challenge
           </span>
           <span className="mr-3 flex items-center">
-            <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-1"></span> Medium priority
+            <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-1"></span> Moderate challenge
           </span>
           <span className="flex items-center">
-            <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1"></span> Low priority
+            <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1"></span> Minor priority
           </span>
         </div>
         
