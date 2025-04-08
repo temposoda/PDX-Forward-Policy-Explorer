@@ -1,0 +1,3 @@
+{
+  "/policy/[policyId]/page": "app/policy/[policyId]/page.js"
+}
