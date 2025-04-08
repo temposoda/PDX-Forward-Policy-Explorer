@@ -121,14 +121,17 @@ const PolicyDetailModal: React.FC<PolicyDetailModalProps> = ({
         <ReactMarkdown
           components={{
             // Customize link rendering
-            a: ({ node, ...props }) => (
-              <a
-                {...props}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline"
-              />
-            )
+            a: ({ node, ...props }) => {
+              console.log(node)
+              return (
+                <a
+                  {...props}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                />
+              )
+            }
           }}
         >
           {evidenceBase}

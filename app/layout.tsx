@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'PDX Forward Policy Explorer',
@@ -17,8 +18,10 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-gray-50">
         <main className="max-w-7xl mx-auto p-4">
-          {children}
-          {modal}
+          <Suspense fallback={<div>loading...</div>}>
+            {children}
+            {modal}
+          </Suspense>
         </main>
       </body>
     </html>

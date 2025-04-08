@@ -1,5 +1,7 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/@modal/policy/[policyId]/page": "app/@modal/policy/[policyId]/page.js",
   "/page": "app/page.js",
   "/policy/[policyId]/page": "app/policy/[policyId]/page.js"
 }

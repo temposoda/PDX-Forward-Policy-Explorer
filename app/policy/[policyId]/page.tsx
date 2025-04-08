@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { fetchPolicyById, fetchPolicyDomains } from '@/app/lib/data';
-import { Policy, DomainMap } from '@/app/lib/types';
+import { Policy } from '@/app/lib/types';
 import { DOMAINS, COST_CATEGORIES, FISCAL_IMPACTS, DomainId } from '@/app/lib/constants';
 import ReactMarkdown from 'react-markdown';
-import { X, Share2, Check } from 'lucide-react';
+import { Share2, Check } from 'lucide-react';
 
 export default function PolicyDetailPage() {
     const params = useParams();
@@ -205,7 +205,7 @@ export default function PolicyDetailPage() {
                 <ReactMarkdown
                     components={{
                         // Customize link rendering
-                        a: ({ node, ...props }) => (
+                        a: (props) => (
                             <a
                                 {...props}
                                 target="_blank"
@@ -217,7 +217,7 @@ export default function PolicyDetailPage() {
                 >
                     {evidenceBase}
                 </ReactMarkdown>
-            </div>
+            </div >
         );
     };
 

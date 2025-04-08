@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { DomainId, DOMAINS, COST_CATEGORIES, FISCAL_IMPACTS } from '@/app/lib/constants';
+import { DomainId, COST_CATEGORIES, FISCAL_IMPACTS } from '@/app/lib/constants';
 import { DomainFilterMode } from '@/app/lib/types';
 import MultiSelect from './MultiSelect';
 
