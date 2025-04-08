@@ -4,7 +4,7 @@ import _ from "lodash";
 import DomainMultiSelect, { type DomainFilterMode } from "./MultiSelect";
 import { Analytics } from "@vercel/analytics/react";
 import PolicyDetailModal, { Policy } from "./PolicyDetailModal";
-import {  DOMAINS, DomainId, FISCAL_IMPACTS, COST_CATEGORIES, CostCategory, DomainMap, FiscalImpact } from "./lib/constants";
+import { DOMAINS, DomainId, FISCAL_IMPACTS, COST_CATEGORIES, CostCategory, DomainMap, FiscalImpact } from "./lib/constants";
 
 const SHEET_ID = "1wGJeSwToqQp7Mg-77TYRzBlrTRsoECJg0QUMDXU3Q_4";
 
@@ -71,19 +71,72 @@ const PolicyExplorer: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(params.get("q") || "");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // New state for modal
   const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+
+
+  const [pendingPolicyId, setPendingPolicyId] = useState<string | null>(null);
+
+  // On component mount, capture the policy ID
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const policyId = params.get("policy");
+    console.log(policyId)
+    if (policyId) {
+      setPendingPolicyId(policyId);
+    }
+  }, []); // Empty dependency array means this runs once on mount
+
+  // After policies load, check if we have a pending policy to open
+  useEffect(() => {
+    console.log({ pendingPolicyId, policies })
+
+    if (pendingPolicyId && policies.length > 0) {
+      const policy = policies.find(p => p.policy_id === pendingPolicyId);
+      if (policy) {
+        setSelectedPolicy(policy);
+        setModalOpen(true);
+        setPendingPolicyId(null); // Clear the pending ID
+      }
+    }
+  }, [pendingPolicyId, policies]);
 
   // Modal handlers
   const openPolicyDetails = (policy: Policy) => {
     setSelectedPolicy(policy);
     setModalOpen(true);
+
+    // Update URL with policy ID
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.set("policy", policy.policy_id);
+
+    // Preserve existing filters if present
+    if (selectedDomains[0] !== "all") {
+      currentParams.set("domains", selectedDomains.join(","));
+      currentParams.set("domainMode", domainFilterMode);
+    }
+    if (selectedCost !== "all") currentParams.set("cost", selectedCost);
+    if (selectedImpact !== "all") currentParams.set("impact", selectedImpact);
+    if (searchQuery) currentParams.set("q", searchQuery);
+
+    const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
+    window.history.pushState({}, "", newUrl);
   };
 
   const closeModal = () => {
     setModalOpen(false);
+
+    // Remove policy parameter from URL but keep filters
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.delete("policy");
+
+    const newUrl = currentParams.toString()
+      ? `${window.location.pathname}?${currentParams.toString()}`
+      : window.location.pathname;
+
+    window.history.pushState({}, "", newUrl);
   };
 
   // Update URL when filters change
@@ -268,21 +321,19 @@ const PolicyExplorer: React.FC = () => {
             <div className="flex items-center border rounded-md overflow-hidden">
               <button
                 onClick={() => setDomainFilterMode("ANY")}
-                className={`px-3 py-2 text-sm ${
-                  domainFilterMode === "ANY"
-                    ? "bg-blue-100 text-blue-800"
-                    : "hover:bg-gray-100"
-                }`}
+                className={`px-3 py-2 text-sm ${domainFilterMode === "ANY"
+                  ? "bg-blue-100 text-blue-800"
+                  : "hover:bg-gray-100"
+                  }`}
               >
                 ANY
               </button>
               <button
                 onClick={() => setDomainFilterMode("ALL")}
-                className={`px-3 py-2 text-sm border-l ${
-                  domainFilterMode === "ALL"
-                    ? "bg-blue-100 text-blue-800"
-                    : "hover:bg-gray-100"
-                }`}
+                className={`px-3 py-2 text-sm border-l ${domainFilterMode === "ALL"
+                  ? "bg-blue-100 text-blue-800"
+                  : "hover:bg-gray-100"
+                  }`}
               >
                 ALL
               </button>
@@ -326,20 +377,20 @@ const PolicyExplorer: React.FC = () => {
             selectedCost !== "all" ||
             selectedImpact !== "all" ||
             searchQuery !== "") && (
-            <button
-              onClick={() => {
-                setSelectedDomains(["all"]);
-                setDomainFilterMode("ANY");
-                setSelectedCost("all");
-                setSelectedImpact("all");
-                setSearchQuery("");
-                window.history.replaceState({}, "", window.location.pathname);
-              }}
-              className="px-4 py-2 text text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md border border-red-200 transition-colors"
-            >
-              🔄 Reset Filters
-            </button>
-          )}
+              <button
+                onClick={() => {
+                  setSelectedDomains(["all"]);
+                  setDomainFilterMode("ANY");
+                  setSelectedCost("all");
+                  setSelectedImpact("all");
+                  setSearchQuery("");
+                  window.history.replaceState({}, "", window.location.pathname);
+                }}
+                className="px-4 py-2 text text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md border border-red-200 transition-colors"
+              >
+                🔄 Reset Filters
+              </button>
+            )}
         </div>
       </div>
 
@@ -352,7 +403,7 @@ const PolicyExplorer: React.FC = () => {
             <div className="p-4">
               {/* Linked title */}
               <h3 className="text-lg font-semibold mb-2">
-                <button 
+                <button
                   className="text-blue-600 hover:text-blue-800 hover:underline text-left"
                   onClick={() => openPolicyDetails(policy)}
                 >
@@ -362,7 +413,7 @@ const PolicyExplorer: React.FC = () => {
                   />
                 </button>
               </h3>
-              
+
               <p className="text-gray-600 mb-4">
                 <HighlightedText
                   text={policy.summary || policy.description || ""}
@@ -436,7 +487,7 @@ const PolicyExplorer: React.FC = () => {
       )}
 
       {/* Policy Detail Modal */}
-      <PolicyDetailModal 
+      <PolicyDetailModal
         policy={selectedPolicy}
         isOpen={modalOpen}
         onClose={closeModal}
