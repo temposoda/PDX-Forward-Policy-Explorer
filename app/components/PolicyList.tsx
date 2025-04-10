@@ -71,13 +71,7 @@ export default function PolicyList({
 
     return (
         <div>
-            <header className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">PDX Forward Policy Explorer</h1>
-                <p className="text-gray-600">
-                    Explore and filter proposed policies by policy area, expected cost,
-                    and budget impact.
-                </p>
-            </header>
+
 
             <FilterControls />
 
