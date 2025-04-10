@@ -1,6 +1,7 @@
 export const dynamic = 'force-static';
 import { fetchPolicyById, fetchPolicyDomains, fetchPolicies } from '@/app/lib/data';
 import PolicyDetailPage from '@/app/components/PolicyDetailPage';
+import PageTransition from '@/app/components/PageTransition';
 
 export async function generateStaticParams() {
     const policies = await fetchPolicies();
@@ -16,9 +17,11 @@ export default async function Page({ params }: any) {
     const policyDomains = await fetchPolicyDomains();
     if (!policy) return <div>loading...</div>
     return (
-        <PolicyDetailPage
-            policy={policy}
-            policyDomains={policyDomains[policyId] || []}
-        />
+        <PageTransition>
+            <PolicyDetailPage
+                policy={policy}
+                policyDomains={policyDomains[policyId] || []}
+            />
+        </PageTransition>
     );
 }
