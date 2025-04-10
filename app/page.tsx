@@ -12,9 +12,9 @@ export default async function Home() {
   return (
     <PageTransition>
       <div>
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">PDX Forward Policy Explorer</h1>
-          <p className="text-gray-600">
+        <header className="mb-6 md:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">PDX Forward Policy Explorer</h1>
+          <p className="text-gray-600 text-sm sm:text-base">
             Explore and filter proposed policies by policy area, expected cost,
             and budget impact.
           </p>

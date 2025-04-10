@@ -191,7 +191,7 @@ export default function PolicyDetails({
                             />
                         ),
                         p: ({ children }) => {
-                            return <p className="whitespace-pre-line mb-5">{children}</p>;
+                            return <p className="mb-4">{children}</p>;
                         }
                     }}
                 >

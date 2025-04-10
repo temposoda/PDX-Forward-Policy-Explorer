@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { DomainId, DOMAINS } from "@/app/lib/constants";
+import { ChevronDown } from "lucide-react";
 
 export type DomainFilterMode = "ANY" | "ALL";
 
@@ -51,22 +52,38 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
       : DOMAINS.filter((d) => selected.includes(d.id));
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative w-full" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-[200px] text-left rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+        className="w-full text-left rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white flex items-center justify-between"
       >
-        {selectedDomains.length === 1 ? (
-          <span>
-            {selectedDomains[0].emoji} {selectedDomains[0].name}
-          </span>
-        ) : (
-          <span>{selectedDomains.length} areas selected</span>
-        )}
+        <div className="flex-grow truncate flex items-center">
+          {selectedDomains.length === 1 ? (
+            <span>
+              {selectedDomains[0].emoji} {selectedDomains[0].name}
+            </span>
+          ) : (
+            <div className="flex items-center">
+              <div className="flex mr-2">
+                {/* Show up to 3 emoji icons */}
+                {selectedDomains.slice(0, 3).map((domain, index) => (
+                  <span key={domain.id} className={index > 0 ? "-ml-1" : ""}>
+                    {domain.emoji}
+                  </span>
+                ))}
+                {selectedDomains.length > 3 && (
+                  <span className="ml-1 text-xs text-gray-500">+{selectedDomains.length - 3}</span>
+                )}
+              </div>
+              <span>{selectedDomains.length} areas selected</span>
+            </div>
+          )}
+        </div>
+        <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-[200px] rounded-md bg-white shadow-lg border border-gray-200">
+        <div className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg border border-gray-200 max-h-60 overflow-auto">
           <div className="py-1">
             {DOMAINS.map((domain) => (
               <div

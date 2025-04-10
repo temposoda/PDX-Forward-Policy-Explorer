@@ -66,75 +66,90 @@ export default function FilterControls() {
                 />
             </div>
 
-            <div className="flex flex-wrap gap-4">
-                {/* Domain Filter with AND/OR toggle */}
-                <div className="flex gap-2 items-center">
-                    <div className="flex items-center border rounded-md overflow-hidden">
-                        <button
-                            onClick={() => setDomainFilterMode("ANY")}
-                            className={`px-3 py-2 text-sm ${domainFilterMode === "ANY"
-                                ? "bg-blue-100 text-blue-800"
-                                : "hover:bg-gray-100"
-                                }`}
-                        >
-                            ANY
-                        </button>
-                        <button
-                            onClick={() => setDomainFilterMode("ALL")}
-                            className={`px-3 py-2 text-sm border-l ${domainFilterMode === "ALL"
-                                ? "bg-blue-100 text-blue-800"
-                                : "hover:bg-gray-100"
-                                }`}
-                        >
-                            ALL
-                        </button>
+            <div className="p-4 border border-gray-200 rounded-md bg-white">
+                {/* Policy Areas Section */}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Policy Areas:</label>
+                    <div className="flex flex-wrap items-center gap-3">
+                        {/* Domain Filter with ANY/ALL toggle - widened buttons with more padding */}
+                        <div className="flex items-center border rounded-md overflow-hidden min-w-[110px]">
+                            <button
+                                onClick={() => setDomainFilterMode("ANY")}
+                                className={`px-4 py-2 text-sm ${domainFilterMode === "ANY"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "hover:bg-gray-100"
+                                    }`}
+                            >
+                                ANY
+                            </button>
+                            <button
+                                onClick={() => setDomainFilterMode("ALL")}
+                                className={`px-4 py-2 text-sm border-l ${domainFilterMode === "ALL"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "hover:bg-gray-100"
+                                    }`}
+                            >
+                                ALL
+                            </button>
+                        </div>
+                        <span className="text-sm">of these</span>
+                        <div className="flex-grow">
+                            <MultiSelect
+                                selected={selectedDomains}
+                                onChange={setSelectedDomains}
+                            />
+                        </div>
                     </div>
-                    <span>of these</span>
-                    <MultiSelect
-                        selected={selectedDomains}
-                        onChange={setSelectedDomains}
-                    />
                 </div>
 
-                <span className="border "> </span>
+                {/* Cost and Impact in 2 columns on larger screens */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    {/* Cost Filter */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Implementation Cost:</label>
+                        <select
+                            value={selectedCost}
+                            onChange={(e) => setSelectedCost(e.target.value)}
+                            className="block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        >
+                            {COST_CATEGORIES.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.emoji || "🤔"} {category.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                {/* Cost Filter */}
-                <select
-                    value={selectedCost}
-                    onChange={(e) => setSelectedCost(e.target.value)}
-                    className="block w-[200px] rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                    {COST_CATEGORIES.map((category) => (
-                        <option key={category.id} value={category.id}>
-                            {category.emoji || "🤔"} {category.name}
-                        </option>
-                    ))}
-                </select>
-
-                {/* Impact Filter */}
-                <select
-                    value={selectedImpact}
-                    onChange={(e) => setSelectedImpact(e.target.value)}
-                    className="block w-[200px] rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                    {FISCAL_IMPACTS.map((impact) => (
-                        <option key={impact.id} value={impact.id}>
-                            {impact.emoji || "🤔"} {impact.name}
-                        </option>
-                    ))}
-                </select>
+                    {/* Impact Filter */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Budget Impact:</label>
+                        <select
+                            value={selectedImpact}
+                            onChange={(e) => setSelectedImpact(e.target.value)}
+                            className="block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        >
+                            {FISCAL_IMPACTS.map((impact) => (
+                                <option key={impact.id} value={impact.id}>
+                                    {impact.emoji || "🤔"} {impact.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
 
                 {/* Reset button */}
                 {(selectedDomains[0] !== "all" ||
                     selectedCost !== "all" ||
                     selectedImpact !== "all" ||
                     searchQuery !== "") && (
-                        <button
-                            onClick={resetFilters}
-                            className="px-4 py-2 text text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md border border-red-200 transition-colors"
-                        >
-                            🔄 Reset Filters
-                        </button>
+                        <div className="flex justify-end">
+                            <button
+                                onClick={resetFilters}
+                                className="px-4 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md border border-red-200 transition-colors"
+                            >
+                                🔄 Reset Filters
+                            </button>
+                        </div>
                     )}
             </div>
         </div>

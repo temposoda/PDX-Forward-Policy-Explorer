@@ -56,3 +56,62 @@
     --chart-5: 340 75% 55%
   }
 }
+
+/* Custom breakpoint for extra small screens */
+@layer utilities {
+  @variants responsive {
+    .xs\:inline {
+      display: inline;
+    }
+
+    .xs\:hidden {
+      display: none;
+    }
+
+    .xs\:flex {
+      display: flex;
+    }
+
+    .xs\:flex-row {
+      flex-direction: row;
+    }
+
+    .xs\:flex-col {
+      flex-direction: column;
+    }
+  }
+}
+
+/* Add responsive padding adjustments */
+@media (max-width: 640px) {
+  main {
+    padding: 0.75rem !important;
+  }
+
+  h1 {
+    font-size: 1.75rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Custom scrollbar for dropdowns */
+.overflow-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
