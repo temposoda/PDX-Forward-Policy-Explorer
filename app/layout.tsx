@@ -1,11 +1,15 @@
 import './globals.css'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import AnimationProvider from './providers/AnimationProvider';
 
 export const metadata: Metadata = {
   title: 'PDX Forward Policy Explorer',
   description: 'Explore and filter proposed policies by policy area, expected cost, and budget impact.',
-  viewport: 'width=device-width, initial-scale=1.0',
+
+}
+
+export const viewport: Viewport = {
+  'width': 'device-width', initialScale: 1
 }
 
 export default function RootLayout({
