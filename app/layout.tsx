@@ -9,10 +9,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  modal,
 }: {
   children: React.ReactNode
-  modal: React.ReactNode
 }) {
   return (
     <html lang="en">
@@ -20,7 +18,6 @@ export default function RootLayout({
         <main className="max-w-7xl mx-auto p-4">
           <Suspense fallback={<div>loading...</div>}>
             {children}
-            {modal}
           </Suspense>
         </main>
       </body>
