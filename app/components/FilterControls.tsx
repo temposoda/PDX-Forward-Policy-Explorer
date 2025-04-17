@@ -2,8 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { createUrlWithUpdatedParams, getFiltersFromSearchParams } from '@/app/lib/navigation';
-import { DomainId, COST_CATEGORIES, FISCAL_IMPACTS, DOMAINS } from '@/app/lib/constants';
-import { DomainFilterMode } from '@/app/lib/types';
+import { COST_CATEGORIES, FISCAL_IMPACTS, DOMAINS } from '@/app/lib/constants';
 import MultiSelect from './MultiSelect';
 
 export default function FilterControls() {
@@ -114,7 +113,7 @@ export default function FilterControls() {
 
                 {searchQuery && (
                     <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex items-center">
-                        🔍 "{searchQuery}"
+                        🔍 &ldquo;{searchQuery}&rdquo;
                         <button
                             onClick={(e) => {
                                 e.preventDefault();
