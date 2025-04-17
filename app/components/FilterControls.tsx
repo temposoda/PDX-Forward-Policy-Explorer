@@ -46,7 +46,6 @@ export default function FilterControls() {
         router.push(pathname);
     };
 
-
     const renderActiveFilters = () => {
         if (selectedDomains[0] === "all" &&
             selectedCost === "all" &&
@@ -56,13 +55,13 @@ export default function FilterControls() {
         }
 
         return (
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
                 {selectedDomains[0] !== "all" && selectedDomains.map(domain => {
                     const domainInfo = DOMAINS.find((d) => d.id === domain);
                     return domainInfo ? (
                         <span
                             key={domain}
-                            className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex items-center"
+                            className="px-3 py-1.5 bg-blue-100 text-blue-800 text-sm rounded-full flex items-center font-medium"
                         >
                             {domainInfo.emoji} {domainInfo.name}
                             <button
@@ -71,7 +70,8 @@ export default function FilterControls() {
                                     const newDomains = selectedDomains.filter(d => d !== domain);
                                     setSelectedDomains(newDomains.length ? newDomains : ["all"]);
                                 }}
-                                className="ml-1 text-blue-500 hover:text-blue-700"
+                                className="ml-2 text-blue-600 hover:text-blue-800"
+                                aria-label={`Remove ${domainInfo.name} filter`}
                             >
                                 ×
                             </button>
@@ -80,15 +80,17 @@ export default function FilterControls() {
                 })}
 
                 {selectedCost !== "all" && (
-                    <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex items-center">
+                    <span className="px-3 py-1.5 bg-blue-100 text-blue-800 text-sm rounded-full flex items-center font-medium">
                         {COST_CATEGORIES.find(c => c.id === selectedCost)?.emoji}
+                        {' '}
                         {COST_CATEGORIES.find(c => c.id === selectedCost)?.name}
                         <button
                             onClick={(e) => {
                                 e.preventDefault();
                                 setSelectedCost("all");
                             }}
-                            className="ml-1 text-blue-500 hover:text-blue-700"
+                            className="ml-2 text-blue-600 hover:text-blue-800"
+                            aria-label={`Remove ${COST_CATEGORIES.find(c => c.id === selectedCost)?.name} filter`}
                         >
                             ×
                         </button>
@@ -96,15 +98,17 @@ export default function FilterControls() {
                 )}
 
                 {selectedImpact !== "all" && (
-                    <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex items-center">
+                    <span className="px-3 py-1.5 bg-blue-100 text-blue-800 text-sm rounded-full flex items-center font-medium">
                         {FISCAL_IMPACTS.find(f => f.id === selectedImpact)?.emoji}
+                        {' '}
                         {FISCAL_IMPACTS.find(f => f.id === selectedImpact)?.name}
                         <button
                             onClick={(e) => {
                                 e.preventDefault();
                                 setSelectedImpact("all");
                             }}
-                            className="ml-1 text-blue-500 hover:text-blue-700"
+                            className="ml-2 text-blue-600 hover:text-blue-800"
+                            aria-label={`Remove ${FISCAL_IMPACTS.find(f => f.id === selectedImpact)?.name} filter`}
                         >
                             ×
                         </button>
@@ -112,14 +116,15 @@ export default function FilterControls() {
                 )}
 
                 {searchQuery && (
-                    <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex items-center">
+                    <span className="px-3 py-1.5 bg-blue-100 text-blue-800 text-sm rounded-full flex items-center font-medium">
                         🔍 &ldquo;{searchQuery}&rdquo;
                         <button
                             onClick={(e) => {
                                 e.preventDefault();
                                 setSearchQuery("");
                             }}
-                            className="ml-1 text-blue-500 hover:text-blue-700"
+                            className="ml-2 text-blue-600 hover:text-blue-800"
+                            aria-label="Clear search"
                         >
                             ×
                         </button>
@@ -129,9 +134,8 @@ export default function FilterControls() {
         );
     };
 
-
     return (
-        <div className="mb-6 space-y-4">
+        <div className="mb-8 space-y-4">
             {/* Search */}
             <div className="w-full">
                 <input
@@ -139,37 +143,38 @@ export default function FilterControls() {
                     placeholder="Search policies..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-4 py-2 rounded-md border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-4 py-3 rounded-md border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-base shadow-sm"
+                    aria-label="Search policies"
                 />
             </div>
 
-            <div className="p-4 border border-gray-200 rounded-md bg-white">
+            <div className="p-5 border border-gray-200 rounded-md bg-white shadow-sm">
                 {/* Policy Areas Section */}
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Policy Areas:</label>
+                <div className="mb-6">
+                    <label className="block text-base font-medium text-gray-800 mb-3">Policy Areas:</label>
                     <div className="flex flex-wrap items-center gap-3">
                         {/* Domain Filter with ANY/ALL toggle - widened buttons with more padding */}
-                        <div className="flex items-center border rounded-md overflow-hidden min-w-[110px]">
+                        <div className="flex items-center border rounded-md overflow-hidden min-w-[120px] shadow-sm">
                             <button
                                 onClick={() => setDomainFilterMode("ANY")}
-                                className={`px-4 py-2 text-sm ${domainFilterMode === "ANY"
+                                className={`px-4 py-2.5 text-sm font-medium ${domainFilterMode === "ANY"
                                     ? "bg-blue-100 text-blue-800"
-                                    : "hover:bg-gray-100"
+                                    : "hover:bg-gray-100 text-gray-700"
                                     }`}
                             >
                                 ANY
                             </button>
                             <button
                                 onClick={() => setDomainFilterMode("ALL")}
-                                className={`px-4 py-2 text-sm border-l ${domainFilterMode === "ALL"
+                                className={`px-4 py-2.5 text-sm font-medium border-l ${domainFilterMode === "ALL"
                                     ? "bg-blue-100 text-blue-800"
-                                    : "hover:bg-gray-100"
+                                    : "hover:bg-gray-100 text-gray-700"
                                     }`}
                             >
                                 ALL
                             </button>
                         </div>
-                        <span className="text-sm">of these</span>
+                        <span className="text-sm font-medium text-gray-600">of these</span>
                         <div className="flex-grow">
                             <MultiSelect
                                 selected={selectedDomains}
@@ -180,14 +185,15 @@ export default function FilterControls() {
                 </div>
 
                 {/* Cost and Impact in 2 columns on larger screens */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     {/* Cost Filter */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Implementation Cost:</label>
+                        <label className="block text-base font-medium text-gray-800 mb-3">Implementation Cost:</label>
                         <select
                             value={selectedCost}
                             onChange={(e) => setSelectedCost(e.target.value)}
-                            className="block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            className="block w-full rounded-md border border-gray-300 px-3 py-2.5 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-base shadow-sm"
+                            aria-label="Select implementation cost filter"
                         >
                             {COST_CATEGORIES.map((category) => (
                                 <option key={category.id} value={category.id}>
@@ -199,11 +205,12 @@ export default function FilterControls() {
 
                     {/* Impact Filter */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Budget Impact:</label>
+                        <label className="block text-base font-medium text-gray-800 mb-3">Budget Impact:</label>
                         <select
                             value={selectedImpact}
                             onChange={(e) => setSelectedImpact(e.target.value)}
-                            className="block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            className="block w-full rounded-md border border-gray-300 px-3 py-2.5 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-base shadow-sm"
+                            aria-label="Select budget impact filter"
                         >
                             {FISCAL_IMPACTS.map((impact) => (
                                 <option key={impact.id} value={impact.id}>
@@ -213,7 +220,7 @@ export default function FilterControls() {
                         </select>
                     </div>
                 </div>
-                <div className='flex justify-between'>
+                <div className='flex justify-between flex-wrap gap-4'>
                     {renderActiveFilters()}
 
                     {/* Reset button */}
@@ -224,7 +231,8 @@ export default function FilterControls() {
                             <div className="flex justify-end">
                                 <button
                                     onClick={resetFilters}
-                                    className="px-4 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md border border-red-200 transition-colors"
+                                    className="px-4 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md border border-red-200 transition-colors font-medium text-sm shadow-sm"
+                                    aria-label="Reset all filters"
                                 >
                                     🔄 Reset Filters
                                 </button>

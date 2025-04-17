@@ -58,20 +58,20 @@ export default function PolicyCard({
     };
 
     return (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-            <div className="p-4">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow hover:border-blue-300">
+            <div className="p-5">
                 {/* Policy title */}
-                <h3 className="text-lg font-semibold mb-2">
+                <h3 className="text-xl font-semibold mb-3">
                     <Link
                         href={`/policy/${policy.policy_id}`}
-                        className="text-blue-600 hover:text-blue-800 hover:underline text-left"
+                        className="text-blue-700 hover:text-blue-900 hover:underline text-left"
                     >
                         <HighlightedText text={policy.title} searchQuery={searchQuery} />
                     </Link>
                 </h3>
 
                 {/* Policy description */}
-                <p className="text-gray-600 mb-4 line-clamp-3">
+                <p className="text-gray-700 mb-5 line-clamp-3 text-base leading-relaxed">
                     <HighlightedText
                         text={policy.summary || policy.description || ""}
                         searchQuery={searchQuery}
@@ -79,15 +79,15 @@ export default function PolicyCard({
                 </p>
 
                 {/* Domain tags */}
-                <div className="mb-4">
-                    <h4 className="text-sm text-gray-500 mb-2">Policy Areas:</h4>
-                    <div className="flex flex-wrap gap-1.5">
+                <div className="mb-5">
+                    <h4 className="text-sm font-medium text-gray-600 mb-2">Policy Areas:</h4>
+                    <div className="flex flex-wrap gap-2">
                         {policyDomains.map((domain) => {
                             const domainInfo = DOMAINS.find((d) => d.id === domain);
                             return domainInfo ? (
                                 <button
                                     key={domain}
-                                    className={`px-2 py-1 rounded text-xs sm:text-sm ${getDomainColor(domain)} hover:opacity-80 cursor-pointer transition-colors`}
+                                    className={`px-3 py-1.5 rounded-full text-sm ${getDomainColor(domain)} hover:opacity-80 cursor-pointer transition-colors font-medium`}
                                     onClick={(e) => handleDomainClick(domain, e)}
                                 >
                                     {domainInfo.emoji}{" "}
@@ -104,27 +104,31 @@ export default function PolicyCard({
                 </div>
 
                 {/* Cost and impact information */}
-                <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
-                    <div>
-                        <h4 className="text-xs text-gray-500 mb-1">Implementation Cost:</h4>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                    <div className="bg-gray-50 p-3 rounded-md">
+                        <h4 className="text-xs font-medium text-gray-600 mb-1.5">Implementation Cost:</h4>
                         <div className="flex items-center">
-                            {COST_CATEGORIES.find(
-                                (c) => c.id === policy.implementation_cost_category
-                            )?.emoji || "🤔"}
-                            <span className="ml-1 truncate">
+                            <span className="text-lg mr-2">
+                                {COST_CATEGORIES.find(
+                                    (c) => c.id === policy.implementation_cost_category
+                                )?.emoji || "🤔"}
+                            </span>
+                            <span className="font-medium">
                                 {policy.implementation_cost_category.replace(/_/g, ' ')
                                     .replace(/\b\w/g, l => l.toUpperCase())}
                             </span>
                         </div>
                     </div>
 
-                    <div>
-                        <h4 className="text-xs text-gray-500 mb-1">Budget Impact:</h4>
+                    <div className="bg-gray-50 p-3 rounded-md">
+                        <h4 className="text-xs font-medium text-gray-600 mb-1.5">Budget Impact:</h4>
                         <div className="flex items-center">
-                            {FISCAL_IMPACTS.find(
-                                (f) => f.id === policy.fiscal_impact_category
-                            )?.emoji || "🤔"}
-                            <span className="ml-1 truncate">
+                            <span className="text-lg mr-2">
+                                {FISCAL_IMPACTS.find(
+                                    (f) => f.id === policy.fiscal_impact_category
+                                )?.emoji || "🤔"}
+                            </span>
+                            <span className="font-medium">
                                 {policy.fiscal_impact_category.replace(/_/g, ' ')
                                     .replace(/\b\w/g, l => l.toUpperCase())}
                             </span>

@@ -57,6 +57,43 @@
   }
 }
 
+/* Improved text rendering for better legibility */
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  letter-spacing: -0.01em;
+  color: #333333;
+}
+
+/* Typography improvements */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+p,
+li {
+  line-height: 1.6;
+}
+
+/* Base font size adjustments for better readability */
+html {
+  font-size: 16px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 17px;
+  }
+}
+
 /* Custom breakpoint for extra small screens */
 @layer utilities {
   @variants responsive {
@@ -82,7 +119,7 @@
   }
 }
 
-/* Add responsive padding adjustments */
+/* Responsive padding and typography adjustments */
 @media (max-width: 640px) {
   main {
     padding: 0.75rem !important;
@@ -90,16 +127,22 @@
 
   h1 {
     font-size: 1.75rem !important;
+    line-height: 1.2 !important;
   }
 
   h2 {
     font-size: 1.5rem !important;
+    line-height: 1.25 !important;
+  }
+
+  p {
+    font-size: 1rem !important;
   }
 }
 
 /* Custom scrollbar for dropdowns */
 .overflow-auto::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .overflow-auto::-webkit-scrollbar-track {
@@ -114,4 +157,52 @@
 
 .overflow-auto::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
+}
+
+/* Improved focus states for accessibility */
+*:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Policy card hover effect */
+.policy-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.policy-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #93c5fd;
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 2.5rem !important;
+}
+
+/* Hide default dropdown arrow in IE10+ */
+select::-ms-expand {
+  display: none;
+}
+
+/* Ensure the MultiSelect chevron has the same positioning */
+.multi-select-chevron {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Ensure consistent padding on dropdown buttons */
+.dropdown-button {
+  padding-right: 2.5rem !important;
+  position: relative;
 }

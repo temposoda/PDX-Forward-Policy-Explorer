@@ -72,13 +72,13 @@ export default function PolicyList({
             <FilterControls />
 
             {/* Results counter */}
-            <div className="mb-4 text-sm text-gray-500">
+            <div className="mb-5 text-base text-gray-600 font-medium">
                 {filteredPolicies.length === 1
                     ? "1 policy found"
                     : `${filteredPolicies.length} policies found`}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
                 {filteredPolicies.map((policy) => (
                     <PolicyCard
                         key={policy.policy_id}
@@ -91,9 +91,9 @@ export default function PolicyList({
             </div>
 
             {filteredPolicies.length === 0 && (
-                <div className="text-center py-8 text-gray-500 border border-gray-200 rounded-md bg-white">
-                    <p className="text-lg mb-2">No policies found</p>
-                    <p className="text-sm">Try adjusting your filters or search terms</p>
+                <div className="text-center py-12 px-4 text-gray-600 border border-gray-200 rounded-md bg-white shadow-sm">
+                    <p className="text-xl mb-3 font-medium">No policies found</p>
+                    <p className="text-base">Try adjusting your filters or search terms</p>
                 </div>
             )}
         </div>
