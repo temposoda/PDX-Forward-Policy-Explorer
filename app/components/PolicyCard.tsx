@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { Policy } from '@/app/lib/types';
 import { DomainId, DOMAINS, COST_CATEGORIES, FISCAL_IMPACTS } from '@/app/lib/constants';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createUrlWithUpdatedParams } from '@/app/lib/navigation';
 
 interface PolicyCardProps {
     policy: Policy;
@@ -19,11 +20,18 @@ export default function PolicyCard({
     getDomainColor
 }: PolicyCardProps) {
     const router = useRouter();
-
+    const searchParams = useSearchParams();
     // Function to handle domain chip clicks
     const handleDomainClick = (domain: DomainId, e: React.MouseEvent) => {
         e.stopPropagation(); // Prevent card click
-        router.push(`/?domains=${domain}`);
+
+        // Update only the domains parameter while preserving other filters
+        const newUrl = createUrlWithUpdatedParams(searchParams, {
+            domains: domain,
+            domainMode: "ANY"
+        });
+
+        router.push(newUrl);
     };
 
     // Helper component for highlighted text

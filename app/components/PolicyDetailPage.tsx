@@ -4,7 +4,8 @@ import { Policy } from '@/app/lib/types';
 import { DomainId, DOMAINS, COST_CATEGORIES, FISCAL_IMPACTS } from '@/app/lib/constants';
 import ReactMarkdown from 'react-markdown';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createUrlWithUpdatedParams } from '@/app/lib/navigation';
 import { Share2, Check } from 'lucide-react';
 
 interface PolicyDetailsProps {
@@ -17,6 +18,7 @@ export default function PolicyDetails({
     policyDomains
 }: PolicyDetailsProps) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [copied, setCopied] = useState(false);
 
 
@@ -32,11 +34,25 @@ export default function PolicyDetails({
 
     // Handle domain clicks
     const handleDomainClick = (domain: DomainId) => {
+        // Update only the domains parameter while preserving other filters
+        const newUrl = createUrlWithUpdatedParams(searchParams, {
+            domains: domain,
+            domainMode: "ANY"
+        });
 
-        // Direct navigation for standalone page
-        router.push(`/?domains=${domain}`);
-
+        router.push(newUrl);
     };
+
+    const handleBackClick = () => {
+        // If we have a referrer from the same origin, use the browser back
+        if (document.referrer && document.referrer.includes(window.location.origin)) {
+            router.back();
+        } else {
+            // Otherwise, go back to the home page
+            router.push('/');
+        }
+    };
+
 
     // Helper function for domain colors
     const getDomainColor = (domain: DomainId): string => {
@@ -205,7 +221,7 @@ export default function PolicyDetails({
         <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm p-6 relative" >
             {/* Back button */}
             <button
-                onClick={() => { router.push('/') }}
+                onClick={handleBackClick}
                 className="mb-4 text-blue-600 hover:text-blue-800 flex items-center"
             >
                 ← Back to Policies

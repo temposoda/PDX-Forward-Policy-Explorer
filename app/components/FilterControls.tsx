@@ -1,47 +1,41 @@
 'use client';
-
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { DomainId, COST_CATEGORIES, FISCAL_IMPACTS } from '@/app/lib/constants';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { createUrlWithUpdatedParams, getFiltersFromSearchParams } from '@/app/lib/navigation';
+import { DomainId, COST_CATEGORIES, FISCAL_IMPACTS, DOMAINS } from '@/app/lib/constants';
 import { DomainFilterMode } from '@/app/lib/types';
 import MultiSelect from './MultiSelect';
 
 export default function FilterControls() {
     const router = useRouter();
+    const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    // Parse initial state from URL parameters
-    const initialDomains = (searchParams.get("domains")?.split(",") as DomainId[]) || ["all"];
-    const initialDomainMode = (searchParams.get("domainMode") as DomainFilterMode) || "ANY";
-    const initialCost = searchParams.get("cost") || "all";
-    const initialImpact = searchParams.get("impact") || "all";
-    const initialQuery = searchParams.get("q") || "";
+    const filters = getFiltersFromSearchParams(searchParams);
 
     // State for filters
-    const [selectedDomains, setSelectedDomains] = useState<DomainId[]>(initialDomains);
-    const [domainFilterMode, setDomainFilterMode] = useState<DomainFilterMode>(initialDomainMode);
-    const [selectedCost, setSelectedCost] = useState(initialCost);
-    const [selectedImpact, setSelectedImpact] = useState(initialImpact);
-    const [searchQuery, setSearchQuery] = useState(initialQuery);
+    const [selectedDomains, setSelectedDomains] = useState(filters.domains);
+    const [domainFilterMode, setDomainFilterMode] = useState(filters.domainMode);
+    const [selectedCost, setSelectedCost] = useState(filters.cost);
+    const [selectedImpact, setSelectedImpact] = useState(filters.impact);
+    const [searchQuery, setSearchQuery] = useState(filters.q);
 
     // Update URL when filters change
     useEffect(() => {
-        const params = new URLSearchParams();
-
-        if (selectedDomains[0] !== "all") {
-            params.set("domains", selectedDomains.join(","));
-            params.set("domainMode", domainFilterMode);
-        }
-        if (selectedCost !== "all") params.set("cost", selectedCost);
-        if (selectedImpact !== "all") params.set("impact", selectedImpact);
-        if (searchQuery) params.set("q", searchQuery);
-
-        const newUrl = params.toString()
-            ? `/?${params.toString()}`
-            : "/";
+        const newUrl = createUrlWithUpdatedParams(
+            searchParams,
+            {
+                domains: selectedDomains[0] === "all" ? null : selectedDomains,
+                domainMode: selectedDomains[0] === "all" ? null : domainFilterMode,
+                cost: selectedCost === "all" ? null : selectedCost,
+                impact: selectedImpact === "all" ? null : selectedImpact,
+                q: searchQuery || null
+            },
+            pathname
+        );
 
         router.push(newUrl);
-    }, [selectedDomains, domainFilterMode, selectedCost, selectedImpact, searchQuery, router]);
+    }, [selectedDomains, domainFilterMode, selectedCost, selectedImpact, searchQuery, router, pathname, searchParams]);
 
     // Reset filters
     const resetFilters = () => {
@@ -50,8 +44,92 @@ export default function FilterControls() {
         setSelectedCost("all");
         setSelectedImpact("all");
         setSearchQuery("");
-        router.push("/");
+        router.push(pathname);
     };
+
+
+    const renderActiveFilters = () => {
+        if (selectedDomains[0] === "all" &&
+            selectedCost === "all" &&
+            selectedImpact === "all" &&
+            !searchQuery) {
+            return null; // No filters active
+        }
+
+        return (
+            <div className="mt-3 flex flex-wrap gap-2">
+                {selectedDomains[0] !== "all" && selectedDomains.map(domain => {
+                    const domainInfo = DOMAINS.find((d) => d.id === domain);
+                    return domainInfo ? (
+                        <span
+                            key={domain}
+                            className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex items-center"
+                        >
+                            {domainInfo.emoji} {domainInfo.name}
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    const newDomains = selectedDomains.filter(d => d !== domain);
+                                    setSelectedDomains(newDomains.length ? newDomains : ["all"]);
+                                }}
+                                className="ml-1 text-blue-500 hover:text-blue-700"
+                            >
+                                ×
+                            </button>
+                        </span>
+                    ) : null;
+                })}
+
+                {selectedCost !== "all" && (
+                    <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex items-center">
+                        {COST_CATEGORIES.find(c => c.id === selectedCost)?.emoji}
+                        {COST_CATEGORIES.find(c => c.id === selectedCost)?.name}
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setSelectedCost("all");
+                            }}
+                            className="ml-1 text-blue-500 hover:text-blue-700"
+                        >
+                            ×
+                        </button>
+                    </span>
+                )}
+
+                {selectedImpact !== "all" && (
+                    <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex items-center">
+                        {FISCAL_IMPACTS.find(f => f.id === selectedImpact)?.emoji}
+                        {FISCAL_IMPACTS.find(f => f.id === selectedImpact)?.name}
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setSelectedImpact("all");
+                            }}
+                            className="ml-1 text-blue-500 hover:text-blue-700"
+                        >
+                            ×
+                        </button>
+                    </span>
+                )}
+
+                {searchQuery && (
+                    <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex items-center">
+                        🔍 "{searchQuery}"
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setSearchQuery("");
+                            }}
+                            className="ml-1 text-blue-500 hover:text-blue-700"
+                        >
+                            ×
+                        </button>
+                    </span>
+                )}
+            </div>
+        );
+    };
+
 
     return (
         <div className="mb-6 space-y-4">
@@ -136,21 +214,24 @@ export default function FilterControls() {
                         </select>
                     </div>
                 </div>
+                <div className='flex justify-between'>
+                    {renderActiveFilters()}
 
-                {/* Reset button */}
-                {(selectedDomains[0] !== "all" ||
-                    selectedCost !== "all" ||
-                    selectedImpact !== "all" ||
-                    searchQuery !== "") && (
-                        <div className="flex justify-end">
-                            <button
-                                onClick={resetFilters}
-                                className="px-4 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md border border-red-200 transition-colors"
-                            >
-                                🔄 Reset Filters
-                            </button>
-                        </div>
-                    )}
+                    {/* Reset button */}
+                    {(selectedDomains[0] !== "all" ||
+                        selectedCost !== "all" ||
+                        selectedImpact !== "all" ||
+                        searchQuery !== "") && (
+                            <div className="flex justify-end">
+                                <button
+                                    onClick={resetFilters}
+                                    className="px-4 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md border border-red-200 transition-colors"
+                                >
+                                    🔄 Reset Filters
+                                </button>
+                            </div>
+                        )}
+                </div>
             </div>
         </div>
     );
