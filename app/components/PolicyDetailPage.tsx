@@ -12,10 +12,8 @@ import {
     Paper,
     Chip,
     Grid,
-    Divider,
     IconButton,
     Tooltip,
-    Alert,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ShareIcon from '@mui/icons-material/Share';
@@ -273,7 +271,11 @@ export default function PolicyDetails({
                 }}
             >
                 <ReactMarkdown
-
+                    components={{
+                        p: ({ children }) => {
+                            return <Typography variant="body2" paragraph>{children}</Typography>;
+                        }
+                    }}
                 >
                     {evidenceBase}
                 </ReactMarkdown>

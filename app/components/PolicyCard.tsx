@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createUrlWithUpdatedParams } from '@/app/lib/navigation';
 import { Policy } from '@/app/lib/types';
-import { DomainId, DOMAINS, COST_CATEGORIES, FISCAL_IMPACTS } from '@/app/lib/constants';
+import { DomainId, DOMAINS, FISCAL_IMPACTS } from '@/app/lib/constants';
 import {
     Card,
     CardContent,
@@ -190,16 +190,58 @@ export default function PolicyCard({
                 {/* Cost and impact information */}
                 <Grid container spacing={1.5}>
                     <Grid size={{ xs: 6 }}>
-                        <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'grey.50' }}>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500 }}>
+                        <Paper
+                            variant="outlined"
+                            sx={{
+                                p: 1.5,
+                                bgcolor: 'grey.50',
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}
+                        >
+                            <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{
+                                    display: 'block',
+                                    mb: 0.5,
+                                    fontWeight: 500
+                                }}
+                            >
                                 Implementation Cost:
                             </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Typography variant="body2" sx={{ mr: 1, fontSize: '1.2rem' }}>
-                                    {COST_CATEGORIES.find(
-                                        (c) => c.id === policy.implementation_cost_category
-                                    )?.emoji || "🤔"}
-                                </Typography>
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                flex: 1
+                            }}>
+                                {/* Render money bags horizontally */}
+                                {policy.implementation_cost_category === "substantial" && (
+                                    <Box sx={{ display: 'flex', mr: 1 }}>
+                                        <span>💰💰💰</span>
+                                    </Box>
+                                )}
+                                {policy.implementation_cost_category === "moderate" && (
+                                    <Box sx={{ display: 'flex', mr: 1 }}>
+                                        <span>💰💰</span>
+                                    </Box>
+                                )}
+                                {policy.implementation_cost_category === "minimal" && (
+                                    <Box sx={{ display: 'flex', mr: 1 }}>
+                                        <span>💰</span>
+                                    </Box>
+                                )}
+                                {policy.implementation_cost_category === "none" && (
+                                    <Box sx={{ display: 'flex', mr: 1 }}>
+                                        <span>🆓</span>
+                                    </Box>
+                                )}
+                                {policy.implementation_cost_category === "variable" && (
+                                    <Box sx={{ display: 'flex', mr: 1 }}>
+                                        <span>🎲</span>
+                                    </Box>
+                                )}
                                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
                                     {policy.implementation_cost_category.replace(/_/g, ' ')
                                         .replace(/\b\w/g, l => l.toUpperCase())}
@@ -209,11 +251,32 @@ export default function PolicyCard({
                     </Grid>
 
                     <Grid size={{ xs: 6 }}>
-                        <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'grey.50' }}>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500 }}>
+                        <Paper
+                            variant="outlined"
+                            sx={{
+                                p: 1.5,
+                                bgcolor: 'grey.50',
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}
+                        >
+                            <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{
+                                    display: 'block',
+                                    mb: 0.5,
+                                    fontWeight: 500
+                                }}
+                            >
                                 Budget Impact:
                             </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                flex: 1
+                            }}>
                                 <Typography variant="body2" sx={{ mr: 1, fontSize: '1.2rem' }}>
                                     {FISCAL_IMPACTS.find(
                                         (f) => f.id === policy.fiscal_impact_category

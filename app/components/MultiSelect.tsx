@@ -5,7 +5,8 @@ import {
   TextField,
   Chip,
   Box,
-  Typography
+  Typography,
+  createFilterOptions
 } from '@mui/material';
 import { DomainId, DOMAINS } from '@/app/lib/constants';
 
@@ -14,6 +15,12 @@ export type DomainFilterMode = "ANY" | "ALL";
 interface MultiSelectProps {
   selected: DomainId[];
   onChange: (selected: DomainId[]) => void;
+}
+
+interface DomainOption {
+  id: string;
+  name: string;
+  emoji: string;
 }
 
 export function MultiSelect({ selected, onChange }: MultiSelectProps) {
@@ -26,17 +33,16 @@ export function MultiSelect({ selected, onChange }: MultiSelectProps) {
 
   // Find selected domains
   const selectedDomains = selected[0] === "all"
-    ? [domainOptions[0]]
+    ? []  // Show empty selection when "all" is selected
     : domainOptions.filter(d => selected.includes(d.id as DomainId));
 
-  // Handle selection changes
-  const handleChange = (_: any, newValues: any) => {
-    // Check if "All" is selected
-    if (newValues.some((item: any) => item.id === "all")) {
-      onChange(["all"]);
-      return;
-    }
+  // Custom filter to handle emoji search
+  const filterOptions = createFilterOptions<DomainOption>({
+    stringify: (option) => `${option.emoji} ${option.name}`,
+  });
 
+  // Handle selection changes
+  const handleChange = (_: any, newValues: DomainOption[]) => {
     // If no values are selected, default to "all"
     if (newValues.length === 0) {
       onChange(["all"]);
@@ -44,42 +50,63 @@ export function MultiSelect({ selected, onChange }: MultiSelectProps) {
     }
 
     // Otherwise, use the selected domains
-    onChange(newValues.map((item: any) => item.id as DomainId));
+    onChange(newValues.map((item) => item.id as DomainId));
   };
 
   return (
     <Autocomplete
       multiple
-      options={domainOptions}
+      disableCloseOnSelect
+      options={domainOptions.filter(d => d.id !== "all")}  // Exclude "all" from options
       value={selectedDomains}
       onChange={handleChange}
+      filterOptions={filterOptions}
       getOptionLabel={(option) => option.name}
-      renderOption={(props, option) => (
-        <Box component="li" {...props}>
-          <Typography sx={{ mr: 1 }}>{option.emoji}</Typography>
-          <Typography>{option.name}</Typography>
-        </Box>
-      )}
-      renderTags={(values, getTagProps) =>
-        values.map((option, index) => (
-          <Chip
-            label={
-              <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
-                {option.emoji} {option.name}
-              </Box>
-            }
-            {...getTagProps({ index })}
-          />
-        ))
+      isOptionEqualToValue={(option, value) => option.id === value.id}
+      renderOption={(props, option) => {
+        const { key, ...optionProps } = props
+        return (
+          <Box id={`policy-domain-${option.name}`} component="li" key={key} {...optionProps} sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography sx={{ mr: 1, fontSize: '1.1rem' }}>{option.emoji}</Typography>
+            <Typography>{option.name}</Typography>
+          </Box>
+        )
+      }}
+      renderValue={(values, getItemProps) =>
+        values.map((option, index) => {
+          const { key, ...itemProps } = getItemProps({ index })
+          return (
+            <Chip
+              key={key}
+              label={
+                <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
+                  {option.emoji} {option.name}
+                </Box>
+              }
+              {...itemProps}
+              size="small"
+            />
+          )
+        })
       }
       renderInput={(params) => (
         <TextField
           {...params}
           variant="outlined"
           size="small"
-          placeholder={selected.length > 0 ? "" : "Select policy areas..."}
+          placeholder={selected[0] === "all" ? "Select policy areas..." : ""}
         />
       )}
+      slotProps={{
+        listbox: { sx: { maxHeight: '300px' } },
+      }}
+      popupIcon={null}
+      clearIcon={null}
+      sx={{
+        '& .MuiOutlinedInput-root': {
+          padding: '3px 8px',
+        }
+      }}
     />
   );
 }

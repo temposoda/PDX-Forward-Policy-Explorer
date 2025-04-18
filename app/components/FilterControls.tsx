@@ -131,7 +131,7 @@ export default function FilterControls() {
                     <Chip
                         label={
                             <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
-                                🔍 "{searchQuery}"
+                                🔍 &quot;{searchQuery}&quot;
                             </Box>
                         }
                         color="primary"
@@ -182,7 +182,13 @@ export default function FilterControls() {
                                     <Box sx={{ flexGrow: 1 }}>
                                         <MultiSelect
                                             selected={selectedDomains}
-                                            onChange={setSelectedDomains}
+                                            onChange={(newDomains) => {
+                                                setSelectedDomains(newDomains);
+                                                // When switching from "all" to specific domains, set a default filter mode
+                                                if (selectedDomains[0] === "all" && newDomains[0] !== "all") {
+                                                    setDomainFilterMode("ANY");
+                                                }
+                                            }}
                                         />
                                     </Box>
                                 </Box>
@@ -257,6 +263,6 @@ export default function FilterControls() {
                     </Stack>
                 </CardContent>
             </Card>
-        </Box >
+        </Box>
     );
 }
