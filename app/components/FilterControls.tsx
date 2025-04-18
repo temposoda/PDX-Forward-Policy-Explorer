@@ -1,9 +1,31 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { createUrlWithUpdatedParams, getFiltersFromSearchParams } from '@/app/lib/navigation';
 import { COST_CATEGORIES, FISCAL_IMPACTS, DOMAINS } from '@/app/lib/constants';
-import MultiSelect from './MultiSelect';
+import { MultiSelect } from './MultiSelect';
+import {
+    Box,
+    Input,
+    Stack,
+    Portal,
+    Select,
+    Card,
+    SegmentGroup,
+    Button,
+    Flex,
+    Badge,
+    Grid,
+    GridItem,
+    HStack,
+    Text,
+    Spacer,
+    CloseButton,
+    Field,
+    createListCollection
+} from '@chakra-ui/react';
+import { RepeatIcon } from 'lucide-react';
 
 export default function FilterControls() {
     const router = useRouter();
@@ -15,8 +37,8 @@ export default function FilterControls() {
     // State for filters
     const [selectedDomains, setSelectedDomains] = useState(filters.domains);
     const [domainFilterMode, setDomainFilterMode] = useState(filters.domainMode);
-    const [selectedCost, setSelectedCost] = useState(filters.cost);
-    const [selectedImpact, setSelectedImpact] = useState(filters.impact);
+    const [selectedCost, setSelectedCost] = useState([filters.cost]);
+    const [selectedImpact, setSelectedImpact] = useState([filters.impact]);
     const [searchQuery, setSearchQuery] = useState(filters.q);
 
     // Update URL when filters change
@@ -26,8 +48,8 @@ export default function FilterControls() {
             {
                 domains: selectedDomains[0] === "all" ? null : selectedDomains,
                 domainMode: selectedDomains[0] === "all" ? null : domainFilterMode,
-                cost: selectedCost === "all" ? null : selectedCost,
-                impact: selectedImpact === "all" ? null : selectedImpact,
+                cost: selectedCost?.[0] === "all" ? null : selectedCost,
+                impact: selectedImpact?.[0] === "all" ? null : selectedImpact,
                 q: searchQuery || null
             },
             pathname
@@ -40,206 +62,273 @@ export default function FilterControls() {
     const resetFilters = () => {
         setSelectedDomains(["all"]);
         setDomainFilterMode("ANY");
-        setSelectedCost("all");
-        setSelectedImpact("all");
+        setSelectedCost(["all"]);
+        setSelectedImpact(["all"]);
         setSearchQuery("");
         router.push(pathname);
     };
 
+    // Create collections for Select components
+    const costCollection = createListCollection({
+        items: COST_CATEGORIES.map(category => ({
+            label: `${category.emoji} ${category.name}`,
+            value: category.id,
+            emoji: category.emoji,
+            name: category.name
+        }))
+    });
+
+    const impactCollection = createListCollection({
+        items: FISCAL_IMPACTS.map(impact => ({
+            label: `${impact.emoji} ${impact.name}`,
+            value: impact.id,
+            emoji: impact.emoji,
+            name: impact.name
+        }))
+    });
+
+
     const renderActiveFilters = () => {
         if (selectedDomains[0] === "all" &&
-            selectedCost === "all" &&
-            selectedImpact === "all" &&
+            selectedCost?.[0] === "all" &&
+            selectedImpact?.[0] === "all" &&
             !searchQuery) {
             return null; // No filters active
         }
 
         return (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <Flex wrap="wrap" gap="2" mt="4">
                 {selectedDomains[0] !== "all" && selectedDomains.map(domain => {
                     const domainInfo = DOMAINS.find((d) => d.id === domain);
                     return domainInfo ? (
-                        <span
+                        <Badge
                             key={domain}
-                            className="px-3 py-1.5 bg-blue-100 text-blue-800 text-sm rounded-full flex items-center font-medium"
+                            colorScheme="blue"
+                            paddingStart="2"
+                            paddingEnd="1"
+                            paddingY="1"
+                            borderRadius="full"
                         >
-                            {domainInfo.emoji} {domainInfo.name}
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    const newDomains = selectedDomains.filter(d => d !== domain);
-                                    setSelectedDomains(newDomains.length ? newDomains : ["all"]);
-                                }}
-                                className="ml-2 text-blue-600 hover:text-blue-800"
-                                aria-label={`Remove ${domainInfo.name} filter`}
-                            >
-                                ×
-                            </button>
-                        </span>
+                            <HStack gap="1">
+                                <Text>{domainInfo.emoji} {domainInfo.name}</Text>
+                                <CloseButton
+                                    size="sm"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        const newDomains = selectedDomains.filter(d => d !== domain);
+                                        setSelectedDomains(newDomains.length ? newDomains : ["all"]);
+                                    }}
+                                    aria-label={`Remove ${domainInfo.name} filter`}
+                                />
+                            </HStack>
+                        </Badge>
                     ) : null;
                 })}
 
-                {selectedCost !== "all" && (
-                    <span className="px-3 py-1.5 bg-blue-100 text-blue-800 text-sm rounded-full flex items-center font-medium">
-                        {COST_CATEGORIES.find(c => c.id === selectedCost)?.emoji}
-                        {' '}
-                        {COST_CATEGORIES.find(c => c.id === selectedCost)?.name}
-                        <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                setSelectedCost("all");
-                            }}
-                            className="ml-2 text-blue-600 hover:text-blue-800"
-                            aria-label={`Remove ${COST_CATEGORIES.find(c => c.id === selectedCost)?.name} filter`}
-                        >
-                            ×
-                        </button>
-                    </span>
+                {selectedCost?.[0] !== "all" && (
+                    <Badge
+                        colorScheme="blue"
+                        paddingStart="2"
+                        paddingEnd="1"
+                        paddingY="1"
+                        borderRadius="full"
+                    >
+                        <HStack gap="1">
+                            <Text>
+                                {COST_CATEGORIES.find(c => c.id === selectedCost?.[0])?.emoji}{' '}
+                                {COST_CATEGORIES.find(c => c.id === selectedCost?.[0])?.name}
+                            </Text>
+                            <CloseButton
+                                size="sm"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setSelectedCost(["all"]);
+                                }}
+                                aria-label="Remove cost filter"
+                            />
+                        </HStack>
+                    </Badge>
                 )}
 
-                {selectedImpact !== "all" && (
-                    <span className="px-3 py-1.5 bg-blue-100 text-blue-800 text-sm rounded-full flex items-center font-medium">
-                        {FISCAL_IMPACTS.find(f => f.id === selectedImpact)?.emoji}
-                        {' '}
-                        {FISCAL_IMPACTS.find(f => f.id === selectedImpact)?.name}
-                        <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                setSelectedImpact("all");
-                            }}
-                            className="ml-2 text-blue-600 hover:text-blue-800"
-                            aria-label={`Remove ${FISCAL_IMPACTS.find(f => f.id === selectedImpact)?.name} filter`}
-                        >
-                            ×
-                        </button>
-                    </span>
+                {selectedImpact?.[0] !== "all" && (
+                    <Badge
+                        colorScheme="blue"
+                        paddingStart="2"
+                        paddingEnd="1"
+                        paddingY="1"
+                        borderRadius="full"
+                    >
+                        <HStack gap="1">
+                            <Text>
+                                {FISCAL_IMPACTS.find(f => f.id === selectedImpact?.[0])?.emoji}{' '}
+                                {FISCAL_IMPACTS.find(f => f.id === selectedImpact?.[0])?.name}
+                            </Text>
+                            <CloseButton
+                                size="sm"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setSelectedImpact(["all"]);
+                                }}
+                                aria-label="Remove budget impact filter"
+                            />
+                        </HStack>
+                    </Badge>
                 )}
 
                 {searchQuery && (
-                    <span className="px-3 py-1.5 bg-blue-100 text-blue-800 text-sm rounded-full flex items-center font-medium">
-                        🔍 &ldquo;{searchQuery}&rdquo;
-                        <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                setSearchQuery("");
-                            }}
-                            className="ml-2 text-blue-600 hover:text-blue-800"
-                            aria-label="Clear search"
-                        >
-                            ×
-                        </button>
-                    </span>
+                    <Badge
+                        colorScheme="blue"
+                        paddingStart="2"
+                        paddingEnd="1"
+                        paddingY="1"
+                        borderRadius="full"
+                    >
+                        <HStack gap="1">
+                            <Text>🔍 &ldquo;{searchQuery}&rdquo;</Text>
+                            <CloseButton
+                                size="sm"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setSearchQuery("");
+                                }}
+                                aria-label="Clear search"
+                            />
+                        </HStack>
+                    </Badge>
                 )}
-            </div>
+            </Flex>
         );
     };
 
     return (
-        <div className="mb-8 space-y-4">
+        <Box mb="8">
             {/* Search */}
-            <div className="w-full">
-                <input
-                    type="text"
-                    placeholder="Search policies..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-4 py-3 rounded-md border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-base shadow-sm"
-                    aria-label="Search policies"
-                />
-            </div>
+            <Input
+                placeholder="Search policies..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                size="lg"
+                mb="4"
+            />
 
-            <div className="p-5 border border-gray-200 rounded-md bg-white shadow-sm">
-                {/* Policy Areas Section */}
-                <div className="mb-6">
-                    <label className="block text-base font-medium text-gray-800 mb-3">Policy Areas:</label>
-                    <div className="flex flex-wrap items-center gap-3">
-                        {/* Domain Filter with ANY/ALL toggle - widened buttons with more padding */}
-                        <div className="flex items-center border rounded-md overflow-hidden min-w-[120px] shadow-sm">
-                            <button
-                                onClick={() => setDomainFilterMode("ANY")}
-                                className={`px-4 py-2.5 text-sm font-medium ${domainFilterMode === "ANY"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : "hover:bg-gray-100 text-gray-700"
-                                    }`}
-                            >
-                                ANY
-                            </button>
-                            <button
-                                onClick={() => setDomainFilterMode("ALL")}
-                                className={`px-4 py-2.5 text-sm font-medium border-l ${domainFilterMode === "ALL"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : "hover:bg-gray-100 text-gray-700"
-                                    }`}
-                            >
-                                ALL
-                            </button>
-                        </div>
-                        <span className="text-sm font-medium text-gray-600">of these</span>
-                        <div className="flex-grow">
-                            <MultiSelect
-                                selected={selectedDomains}
-                                onChange={setSelectedDomains}
-                            />
-                        </div>
-                    </div>
-                </div>
+            <Card.Root variant="outline" mb="4">
+                <Card.Body>
+                    <Stack gap="6">
+                        {/* Policy Areas Section */}
+                        <Box>
+                            <Field.Root>
+                                <Field.Label fontWeight="medium" fontSize="md">Policy Areas:</Field.Label>
+                                <Flex alignItems="center" flexWrap="wrap" gap="3">
+                                    <SegmentGroup.Root
+                                        value={domainFilterMode}
+                                        onValueChange={(e) => setDomainFilterMode(e.value as any)}
+                                        colorPalette="blue"
+                                        size="sm"
+                                    >
+                                        <SegmentGroup.Indicator />
+                                        <SegmentGroup.Items items={["ANY", "ALL"]} />
+                                    </SegmentGroup.Root>
 
-                {/* Cost and Impact in 2 columns on larger screens */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    {/* Cost Filter */}
-                    <div>
-                        <label className="block text-base font-medium text-gray-800 mb-3">Implementation Cost:</label>
-                        <select
-                            value={selectedCost}
-                            onChange={(e) => setSelectedCost(e.target.value)}
-                            className="block w-full rounded-md border border-gray-300 px-3 py-2.5 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-base shadow-sm"
-                            aria-label="Select implementation cost filter"
-                        >
-                            {COST_CATEGORIES.map((category) => (
-                                <option key={category.id} value={category.id}>
-                                    {category.emoji || "🤔"} {category.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                                    <Text fontSize="sm" fontWeight="medium" color="gray.600">of these</Text>
 
-                    {/* Impact Filter */}
-                    <div>
-                        <label className="block text-base font-medium text-gray-800 mb-3">Budget Impact:</label>
-                        <select
-                            value={selectedImpact}
-                            onChange={(e) => setSelectedImpact(e.target.value)}
-                            className="block w-full rounded-md border border-gray-300 px-3 py-2.5 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-base shadow-sm"
-                            aria-label="Select budget impact filter"
-                        >
-                            {FISCAL_IMPACTS.map((impact) => (
-                                <option key={impact.id} value={impact.id}>
-                                    {impact.emoji || "🤔"} {impact.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-                <div className='flex justify-between flex-wrap gap-4'>
-                    {renderActiveFilters()}
+                                    <Box flex="1">
+                                        <MultiSelect
+                                            selected={selectedDomains}
+                                            onChange={setSelectedDomains}
+                                        />
+                                    </Box>
+                                </Flex>
+                            </Field.Root>
+                        </Box>
 
-                    {/* Reset button */}
-                    {(selectedDomains[0] !== "all" ||
-                        selectedCost !== "all" ||
-                        selectedImpact !== "all" ||
-                        searchQuery !== "") && (
-                            <div className="flex justify-end">
-                                <button
-                                    onClick={resetFilters}
-                                    className="px-4 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md border border-red-200 transition-colors font-medium text-sm shadow-sm"
-                                    aria-label="Reset all filters"
+                        {/* Cost and Impact in 2 columns on larger screens */}
+                        <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap="6">
+                            {/* Cost Filter using new Select pattern */}
+                            <GridItem>
+                                <Select.Root
+                                    value={selectedCost}
+                                    onValueChange={(details) => setSelectedCost(details.value)}
+                                    collection={costCollection}
                                 >
-                                    🔄 Reset Filters
-                                </button>
-                            </div>
-                        )}
-                </div>
-            </div>
-        </div>
+                                    <Select.Label fontWeight="medium" fontSize="md">Implementation Cost:</Select.Label>
+                                    <Select.Control>
+                                        <Select.Trigger>
+                                            <Select.ValueText placeholder="Select cost category" />
+                                        </Select.Trigger>
+                                        <Select.IndicatorGroup>
+                                            <Select.Indicator />
+                                        </Select.IndicatorGroup>
+                                    </Select.Control>
+                                    <Portal>
+                                        <Select.Positioner>
+                                            <Select.Content>
+                                                {costCollection.items.map((category) => (
+                                                    <Select.Item item={category} key={category.value}>
+                                                        {category.label}
+                                                        <Select.ItemIndicator />
+                                                    </Select.Item>
+                                                ))}
+                                            </Select.Content>
+                                        </Select.Positioner>
+                                    </Portal>
+                                </Select.Root>
+                            </GridItem>
+
+                            {/* Impact Filter using new Select pattern */}
+                            <GridItem>
+                                <Select.Root
+                                    value={selectedImpact}
+                                    onValueChange={(details) => setSelectedImpact(details.value)}
+                                    collection={impactCollection}
+                                >
+                                    <Select.Label fontWeight="medium" fontSize="md">Budget Impact:</Select.Label>
+                                    <Select.Control>
+                                        <Select.Trigger>
+                                            <Select.ValueText placeholder="Select budget impact" />
+                                        </Select.Trigger>
+                                        <Select.IndicatorGroup>
+                                            <Select.Indicator />
+                                        </Select.IndicatorGroup>
+                                    </Select.Control>
+                                    <Portal>
+                                        <Select.Positioner>
+                                            <Select.Content>
+                                                {impactCollection.items.map((impact) => (
+                                                    <Select.Item item={impact} key={impact.value}>
+                                                        {impact.label}
+                                                        <Select.ItemIndicator />
+                                                    </Select.Item>
+                                                ))}
+                                            </Select.Content>
+                                        </Select.Positioner>
+                                    </Portal>
+                                </Select.Root>
+                            </GridItem>
+                        </Grid>
+
+                        <Flex wrap="wrap" justify="space-between" align="center">
+                            {renderActiveFilters()}
+                            <Spacer />
+                            {/* Reset button */}
+                            {(selectedDomains[0] !== "all" ||
+                                selectedCost?.[0] !== "all" ||
+                                selectedImpact?.[0] !== "all" ||
+                                searchQuery !== "") && (
+                                    <Button
+                                        variant="outline"
+                                        colorScheme="red"
+                                        size="sm"
+                                        onClick={resetFilters}
+                                        ml="auto"
+                                        mt={{ base: 4, md: 0 }}
+                                    >
+                                        <RepeatIcon /> Reset Filters
+                                    </Button>
+                                )}
+                        </Flex>
+                    </Stack>
+                </Card.Body>
+            </Card.Root>
+        </Box>
     );
 }

@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import AnimationProvider from './providers/AnimationProvider';
 import { Inter } from 'next/font/google';
+import { Provider } from "@/app/components/ui/provider"
 
 // Load Inter font with specific subsets
 const inter = Inter({
@@ -26,13 +27,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html suppressHydrationWarning lang="en" className={inter.variable}>
       <body className="bg-gray-50 font-sans">
-        <AnimationProvider>
-          <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 md:px-8 md:py-8">
-            {children}
-          </main>
-        </AnimationProvider>
+        <Provider>
+          <AnimationProvider>
+            <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 md:px-8 md:py-8">
+              {children}
+            </main>
+          </AnimationProvider>
+        </Provider>
       </body>
     </html>
   );
