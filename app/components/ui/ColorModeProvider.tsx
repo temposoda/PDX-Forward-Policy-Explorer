@@ -4,6 +4,8 @@ import { ReactNode, createContext, useContext, useState, useMemo, useEffect } fr
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { PaletteMode } from '@mui/material';
 import { getTheme } from '@/app/lib/theme';
+import { createTheme } from '@mui/material/styles';
+
 
 type ColorModeContextType = {
     mode: PaletteMode;
@@ -59,7 +61,7 @@ export function ColorModeProvider({ children }: ColorModeProviderProps) {
 
     return (
         <ColorModeContext.Provider value={colorMode}>
-            <ThemeProvider theme={theme}>
+            <ThemeProvider theme={createTheme()}>
                 <CssBaseline />
                 {children}
             </ThemeProvider>
