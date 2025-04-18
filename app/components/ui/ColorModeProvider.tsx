@@ -55,7 +55,7 @@ export function ColorModeProvider({ children }: ColorModeProviderProps) {
         [mode]
     );
 
-    const theme = useMemo(() => getTheme(mode), [mode]);
+    const theme = useMemo(() => getTheme(), [mode]);
 
     return (
         <ColorModeContext.Provider value={colorMode}>

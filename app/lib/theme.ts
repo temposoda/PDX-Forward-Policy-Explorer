@@ -1,11 +1,10 @@
 import { createTheme, responsiveFontSizes } from '@mui/material/styles';
-import { PaletteMode } from '@mui/material';
 
 // Improved dark mode theme settings
-export const getTheme = (mode: PaletteMode) => {
+export const getTheme = () => {
     let theme = createTheme({
         palette: {
-            mode,
+            mode: 'light',
             ...{
                 // Light mode palette (unchanged)
                 primary: {
