@@ -1,8 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import { DomainId, DOMAINS } from "@/app/lib/constants";
-import { ChevronDown } from "lucide-react";
+import {
+  Autocomplete,
+  TextField,
+  Chip,
+  Box,
+  Typography
+} from '@mui/material';
+import { DomainId, DOMAINS } from '@/app/lib/constants';
 
 export type DomainFilterMode = "ANY" | "ALL";
 
@@ -11,104 +16,70 @@ interface MultiSelectProps {
   onChange: (selected: DomainId[]) => void;
 }
 
-const MultiSelect: React.FC<MultiSelectProps> = ({
-  selected,
-  onChange,
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+export function MultiSelect({ selected, onChange }: MultiSelectProps) {
+  // Create domain options from the DOMAINS constant
+  const domainOptions = DOMAINS.map(domain => ({
+    id: domain.id,
+    name: domain.name,
+    emoji: domain.emoji
+  }));
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
+  // Find selected domains
+  const selectedDomains = selected[0] === "all"
+    ? [domainOptions[0]]
+    : domainOptions.filter(d => selected.includes(d.id as DomainId));
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const toggle = (domainId: DomainId) => {
-    if (domainId === "all") {
+  // Handle selection changes
+  const handleChange = (_: any, newValues: any) => {
+    // Check if "All" is selected
+    if (newValues.some((item: any) => item.id === "all")) {
       onChange(["all"]);
       return;
     }
 
-    const newSelected = selected.includes(domainId)
-      ? selected.filter((id) => id !== domainId)
-      : [...selected.filter((id) => id !== "all"), domainId];
+    // If no values are selected, default to "all"
+    if (newValues.length === 0) {
+      onChange(["all"]);
+      return;
+    }
 
-    onChange(newSelected.length ? newSelected : ["all"]);
+    // Otherwise, use the selected domains
+    onChange(newValues.map((item: any) => item.id as DomainId));
   };
 
-  const selectedDomains =
-    selected[0] === "all"
-      ? [DOMAINS[0]]
-      : DOMAINS.filter((d) => selected.includes(d.id));
-
   return (
-    <div className="relative w-full" ref={dropdownRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full text-left rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white flex items-center justify-between text-base shadow-sm"
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-      >
-        <div className="flex-grow truncate flex items-center">
-          {selectedDomains.length === 1 ? (
-            <span className="flex items-center">
-              <span className="mr-1">{selectedDomains[0].emoji}</span> {selectedDomains[0].name}
-            </span>
-          ) : (
-            <div className="flex items-center">
-              <div className="flex mr-2">
-                {/* Show up to 3 emoji icons */}
-                {selectedDomains.slice(0, 3).map((domain, index) => (
-                  <span key={domain.id} className={index > 0 ? "-ml-1" : ""}>
-                    {domain.emoji}
-                  </span>
-                ))}
-                {selectedDomains.length > 3 && (
-                  <span className="ml-1 text-xs text-gray-500">+{selectedDomains.length - 3}</span>
-                )}
-              </div>
-              <span>{selectedDomains.length} areas selected</span>
-            </div>
-          )}
-        </div>
-        <ChevronDown size={16} className={`transition-transform duration-200 text-gray-600 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      {isOpen && (
-        <div className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg border border-gray-200 max-h-64 overflow-auto" role="listbox">
-          <div className="py-1">
-            {DOMAINS.map((domain) => (
-              <div
-                key={domain.id}
-                onClick={() => toggle(domain.id)}
-                className={`px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between ${selected.includes(domain.id) ? "bg-gray-100" : ""
-                  }`}
-                role="option"
-                aria-selected={selected.includes(domain.id)}
-              >
-                <span className="flex items-center">
-                  <span className="mr-1">{domain.emoji}</span> {domain.name}
-                </span>
-                {selected.includes(domain.id) && (
-                  <span className="text-blue-600">✓</span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+    <Autocomplete
+      multiple
+      options={domainOptions}
+      value={selectedDomains}
+      onChange={handleChange}
+      getOptionLabel={(option) => option.name}
+      renderOption={(props, option) => (
+        <Box component="li" {...props}>
+          <Typography sx={{ mr: 1 }}>{option.emoji}</Typography>
+          <Typography>{option.name}</Typography>
+        </Box>
       )}
-    </div>
+      renderTags={(values, getTagProps) =>
+        values.map((option, index) => (
+          <Chip
+            label={
+              <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
+                {option.emoji} {option.name}
+              </Box>
+            }
+            {...getTagProps({ index })}
+          />
+        ))
+      }
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          variant="outlined"
+          size="small"
+          placeholder={selected.length > 0 ? "" : "Select policy areas..."}
+        />
+      )}
+    />
   );
-};
-
-export default MultiSelect;
+}

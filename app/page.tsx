@@ -3,6 +3,7 @@ export const dynamic = 'force-static';  // Force static generation
 import { fetchPolicies, fetchPolicyDomains } from '@/app/lib/data';
 import PolicyList from '@/app/components/PolicyList';
 import PageTransition from './components/PageTransition';
+import { Typography, Box } from '@mui/material';
 
 export default async function Home() {
   // Fetch at build time
@@ -11,23 +12,39 @@ export default async function Home() {
 
   return (
     <PageTransition>
-      <div>
-        <header className="mb-8 md:mb-10">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3 text-gray-900 tracking-tight">
+      <Box>
+        <Box component="header" sx={{ mb: { xs: 4, md: 5 } }}>
+          <Typography
+            variant="h3"
+            component="h1"
+            sx={{
+              mb: 1.5,
+              fontWeight: 'bold',
+              color: 'text.primary',
+              letterSpacing: '-0.025em'
+            }}
+          >
             PDX Forward Policy Explorer
-          </h1>
-          <p className="text-gray-600 text-base sm:text-lg max-w-3xl leading-relaxed">
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{
+              maxWidth: 'md',
+              lineHeight: 1.6
+            }}
+          >
             Explore and filter proposed policies by policy area, expected cost,
             and budget impact.
-          </p>
-        </header>
+          </Typography>
+        </Box>
 
         {/* Pass data to client component for filtering/interaction */}
         <PolicyList
           policies={policies}
           policyDomains={policyDomains}
         />
-      </div>
+      </Box>
     </PageTransition>
   );
 }

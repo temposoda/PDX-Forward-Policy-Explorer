@@ -1,16 +1,30 @@
 'use client';
 
-import { Policy } from '@/app/lib/types';
-import { DomainId, DOMAINS, COST_CATEGORIES, FISCAL_IMPACTS } from '@/app/lib/constants';
-import ReactMarkdown from 'react-markdown';
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createUrlWithUpdatedParams } from '@/app/lib/navigation';
-import { Share2, Check } from 'lucide-react';
+import { Policy } from '@/app/lib/types';
+import { DomainId, DOMAINS, COST_CATEGORIES, FISCAL_IMPACTS } from '@/app/lib/constants';
+import {
+    Box,
+    Typography,
+    Button,
+    Paper,
+    Chip,
+    Grid,
+    Divider,
+    IconButton,
+    Tooltip,
+    Alert,
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ShareIcon from '@mui/icons-material/Share';
+import CheckIcon from '@mui/icons-material/Check';
+import ReactMarkdown from 'react-markdown';
 
 interface PolicyDetailsProps {
     policy: Policy;
-    policyDomains: DomainId[]
+    policyDomains: DomainId[];
 }
 
 export default function PolicyDetails({
@@ -20,7 +34,6 @@ export default function PolicyDetails({
     const router = useRouter();
     const searchParams = useSearchParams();
     const [copied, setCopied] = useState(false);
-
 
     // Copy link to policy
     const copyPolicyLink = () => {
@@ -53,23 +66,20 @@ export default function PolicyDetails({
         }
     };
 
-
     // Helper function for domain colors
-    const getDomainColor = (domain: DomainId): string => {
-        const colors: Record<Exclude<DomainId, "all">, string> = {
-            housing: "bg-pink-100 text-pink-800",
-            environment: "bg-green-100 text-green-800",
-            safety: "bg-yellow-100 text-yellow-800",
-            democracy: "bg-blue-100 text-blue-800",
-            "economic-development": "bg-orange-100 text-orange-800",
-            "infrastructure-and-transportation": "bg-indigo-100 text-indigo-800",
-            "social-services": "bg-purple-100 text-purple-800",
-            "public-health": "bg-red-100 text-red-800",
+    const getDomainColor = (domain: DomainId): { main: string; contrastText: string } => {
+        const colors: Record<Exclude<DomainId, "all">, { main: string; contrastText: string }> = {
+            housing: { main: "#FCE7F3", contrastText: "#9D174D" }, // pink-100, pink-800
+            environment: { main: "#D1FAE5", contrastText: "#065F46" }, // green-100, green-800
+            safety: { main: "#FEF3C7", contrastText: "#92400E" }, // yellow-100, yellow-800
+            democracy: { main: "#DBEAFE", contrastText: "#1E40AF" }, // blue-100, blue-800
+            "economic-development": { main: "#FFEDD5", contrastText: "#9A3412" }, // orange-100, orange-800
+            "infrastructure-and-transportation": { main: "#E0E7FF", contrastText: "#3730A3" }, // indigo-100, indigo-800
+            "social-services": { main: "#F3E8FF", contrastText: "#6B21A8" }, // purple-100, purple-800
+            "public-health": { main: "#FEE2E2", contrastText: "#991B1B" }, // red-100, red-800
         };
 
-        return (
-            colors[domain as Exclude<DomainId, "all">] || "bg-gray-100 text-gray-800"
-        );
+        return colors[domain as Exclude<DomainId, "all">] || { main: "#F3F4F6", contrastText: "#1F2937" };
     };
 
     // Helper function to render stakeholders with categories
@@ -81,7 +91,7 @@ export default function PolicyDetails({
 
         if (categoryMatches.length === 0) {
             // Simple fallback if no categories detected
-            return <p>{stakeholdersString}</p>;
+            return <Typography variant="body2">{stakeholdersString}</Typography>;
         }
 
         // Create segments by splitting at each category
@@ -113,42 +123,42 @@ export default function PolicyDetails({
         });
 
         return (
-            <div className="space-y-3">
+            <Box component="div" sx={{ '& > div:not(:last-child)': { mb: 1.5 } }}>
                 {categorySegments.map(category => (
-                    <div key={category.name} className="mb-2 last:mb-0">
-                        <p>
-                            <span className="font-semibold">{category.name}:</span>{' '}
+                    <Box key={category.name}>
+                        <Typography variant="body2">
+                            <Box component="span" sx={{ fontWeight: 600 }}>{category.name}: </Box>
                             {category.stakeholders.join(', ')}
-                        </p>
-                    </div>
+                        </Typography>
+                    </Box>
                 ))}
-            </div>
+            </Box>
         );
     };
 
     // Helper function to render implementation challenges with colors
     const renderChallenges = (challenges: string) => {
         if (!challenges) return null;
+
         // Regex to extract severity descriptor from strings like "[significant] Whatever: ..."
         const severityRegex = /\[([^\]]+)\]/;
+
         // Define challenge severity colors
         const getChallengeColor = (challenge: string): string => {
             const colors = {
-                significant: "bg-red-500",
-                major: "bg-orange-500",
-                moderate: "bg-yellow-500",
-                minor: "bg-blue-500",
-                "": "bg-blue-500",
-            }
+                significant: "#EF4444", // red-500
+                major: "#F97316", // orange-500
+                moderate: "#EAB308", // yellow-500
+                minor: "#3B82F6", // blue-500
+                "": "#3B82F6", // blue-500 default
+            };
 
-
-            // Test function to demonstrate usage
             function extractSeverity(input: string): keyof typeof colors {
                 const match = input.match(severityRegex);
                 return (match ? match[1] : "") as keyof typeof colors;
             }
-            const severity = extractSeverity(challenge)
 
+            const severity = extractSeverity(challenge);
             return colors[severity];
         };
 
@@ -165,28 +175,82 @@ export default function PolicyDetails({
             .filter(Boolean);
 
         return (
-            <>
+            <Box>
                 {/* Challenge color legend */}
-                <div className="mb-3 flex items-center text-xs text-gray-600">
-                    <span className="mr-3 flex items-center">
-                        <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-1"></span> Significant
-                    </span>
-                    <span className="mr-3 flex items-center">
-                        <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-1"></span> Moderate
-                    </span>
-                    <span className="flex items-center">
-                        <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1"></span> Minor
-                    </span>
-                </div>
+                <Box
+                    sx={{
+                        mb: 1.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        fontSize: '0.75rem',
+                        color: 'text.secondary'
+                    }}
+                >
+                    <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                        <Box
+                            component="span"
+                            sx={{
+                                display: 'inline-block',
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                bgcolor: '#EF4444',
+                                mr: 0.5
+                            }}
+                        />
+                        Significant
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                        <Box
+                            component="span"
+                            sx={{
+                                display: 'inline-block',
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                bgcolor: '#EAB308',
+                                mr: 0.5
+                            }}
+                        />
+                        Moderate
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box
+                            component="span"
+                            sx={{
+                                display: 'inline-block',
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                bgcolor: '#3B82F6',
+                                mr: 0.5
+                            }}
+                        />
+                        Minor
+                    </Box>
+                </Box>
 
                 {/* Challenge items */}
-                {challengeItems.map((data, idx) => (
-                    <div key={idx} className={`flex items-start ${idx > 0 ? 'mt-3' : ''}`}>
-                        <div className={`flex-shrink-0 w-2 h-2 mt-1.5 mr-2 rounded-full ${data.color}`}></div>
-                        <div>{data.text}</div>
-                    </div>
-                ))}
-            </>
+                <Box sx={{ '& > div:not(:first-of-type)': { mt: 1.5 } }}>
+                    {challengeItems.map((data, idx) => (
+                        <Box key={idx} sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                            <Box
+                                component="span"
+                                sx={{
+                                    flexShrink: 0,
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: '50%',
+                                    bgcolor: data.color,
+                                    mt: 1.2,
+                                    mr: 1
+                                }}
+                            />
+                            <Typography variant="body2">{data.text}</Typography>
+                        </Box>
+                    ))}
+                </Box>
+            </Box>
         );
     };
 
@@ -194,143 +258,194 @@ export default function PolicyDetails({
         if (!evidenceBase) return null;
 
         return (
-            <div className="prose prose-sm max-w-none prose-a:text-blue-600 prose-a:underline">
-                <ReactMarkdown
-                    components={{
-                        // Customize link rendering
-                        a: (props) => (
-                            <a
-                                {...props}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 underline"
-                            />
-                        ),
-                        p: ({ children }) => {
-                            return <p className="mb-4">{children}</p>;
+            <Box
+                sx={{
+                    '& a': {
+                        color: 'primary.main',
+                        textDecoration: 'underline',
+                        '&:hover': {
+                            color: 'primary.dark'
                         }
-                    }}
+                    },
+                    '& p': {
+                        mb: 2
+                    }
+                }}
+            >
+                <ReactMarkdown
+
                 >
                     {evidenceBase}
                 </ReactMarkdown>
-            </div >
+            </Box>
         );
     };
 
     return (
-        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm p-6 relative" >
+        <Paper
+            elevation={0}
+            sx={{
+                maxWidth: 'md',
+                mx: 'auto',
+                p: { xs: 2, sm: 3, md: 4 },
+                position: 'relative',
+                borderRadius: 2
+            }}
+        >
             {/* Back button */}
-            <button
+            <Button
+                startIcon={<ArrowBackIcon />}
                 onClick={handleBackClick}
-                className="mb-4 text-blue-600 hover:text-blue-800 flex items-center"
+                sx={{ mb: 2 }}
+                color="primary"
             >
-                ← Back to Policies
-            </button>
-
+                Back to Policies
+            </Button>
 
             {/* Share button */}
-            <button
-                onClick={copyPolicyLink}
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 flex items-center"
-                aria-label="Share policy link"
-            >
-                {copied ? (
-                    <>
-                        <Check size={18} className="mr-1 text-green-600" />
-                        <span className="text-sm text-green-600">Copied!</span>
-                    </>
-                ) : (
-                    <>
-                        <Share2 size={18} className="mr-1" />
-                        <span className="text-sm">Share</span>
-                    </>
-                )}
-            </button>
+            <Box sx={{ position: 'absolute', top: { xs: 16, sm: 24 }, right: { xs: 16, sm: 24 } }}>
+                <Tooltip title={copied ? "Copied!" : "Share policy link"}>
+                    <IconButton onClick={copyPolicyLink} color={copied ? "success" : "default"}>
+                        {copied ? <CheckIcon /> : <ShareIcon />}
+                    </IconButton>
+                </Tooltip>
+            </Box>
 
             {/* Policy title and basic info */}
-            <h2 className="text-2xl font-semibold mb-4 pr-32">{policy.title}</h2>
+            <Typography
+                variant="h4"
+                component="h1"
+                gutterBottom
+                sx={{
+                    fontWeight: 'bold',
+                    pr: { xs: 8, sm: 10 },
+                    mb: 2
+                }}
+            >
+                {policy.title}
+            </Typography>
 
-            <p className="text-gray-600 mb-6">
+            <Typography
+                variant="body1"
+                color="text.secondary"
+                paragraph
+                sx={{ mb: 3 }}
+            >
                 {policy.summary || policy.description || ""}
-            </p>
+            </Typography>
 
             {/* Domain tags */}
-            <div className="mb-6">
-                <h3 className="text-lg font-medium mb-2">Policy Areas:</h3>
-                <div className="flex flex-wrap gap-2">
+            <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" gutterBottom>Policy Areas:</Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                     {policyDomains.map((domain) => {
                         const domainInfo = DOMAINS.find((d) => d.id === domain);
+                        const domainColor = getDomainColor(domain);
                         return domainInfo ? (
-                            <button
+                            <Chip
                                 key={domain}
-                                className={`px-2 py-1 rounded text-sm ${getDomainColor(domain)} hover:opacity-80 cursor-pointer`}
+                                label={
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        {domainInfo.emoji} {domain.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+                                    </Box>
+                                }
                                 onClick={() => handleDomainClick(domain)}
-                            >
-                                {domainInfo.emoji} {domain.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-                            </button>
+                                sx={{
+                                    bgcolor: domainColor.main,
+                                    color: domainColor.contrastText,
+                                    '&:hover': {
+                                        bgcolor: domainColor.main,
+                                        opacity: 0.8
+                                    }
+                                }}
+                            />
                         ) : null;
                     })}
-                </div>
-            </div>
+                </Box>
+            </Box>
 
             {/* Cost and impact information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <h3 className="text-lg font-medium mb-2">Implementation Cost:</h3>
-                    <div className="flex items-center">
-                        {COST_CATEGORIES.find(
-                            (c) => c.id === policy.implementation_cost_category
-                        )?.emoji || "🤔"}
-                        <span className="ml-2">
+            <Grid container spacing={3} sx={{ mb: 3 }}>
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <Typography variant="h6" gutterBottom>Implementation Cost:</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body1" sx={{ mr: 1, fontSize: '1.5rem' }}>
+                            {COST_CATEGORIES.find(
+                                (c) => c.id === policy.implementation_cost_category
+                            )?.emoji || "🤔"}
+                        </Typography>
+                        <Typography variant="body1">
                             {policy.implementation_cost_category.replace(/_/g, ' ')
                                 .replace(/\b\w/g, l => l.toUpperCase())}
-                        </span>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 className="text-lg font-medium mb-2">Impact on City Budget:</h3>
-                    <div className="flex items-center">
-                        {FISCAL_IMPACTS.find(
-                            (f) => f.id === policy.fiscal_impact_category
-                        )?.emoji || "🤔"}
-                        <span className="ml-2">
+                        </Typography>
+                    </Box>
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <Typography variant="h6" gutterBottom>Impact on City Budget:</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body1" sx={{ mr: 1, fontSize: '1.5rem' }}>
+                            {FISCAL_IMPACTS.find(
+                                (f) => f.id === policy.fiscal_impact_category
+                            )?.emoji || "🤔"}
+                        </Typography>
+                        <Typography variant="body1">
                             {policy.fiscal_impact_category.replace(/_/g, ' ')
                                 .replace(/\b\w/g, l => l.toUpperCase())}
-                        </span>
-                    </div>
-                </div>
-            </div>
+                        </Typography>
+                    </Box>
+                </Grid>
+            </Grid>
 
             {/* Evidence Base */}
             {policy.evidence_base && (
-                <div className="mb-6">
-                    <h3 className="text-lg font-medium mb-2">Evidence Base</h3>
-                    <div className="bg-gray-50 border border-gray-200 p-4 rounded-md">
+                <Box sx={{ mb: 3 }}>
+                    <Typography variant="h6" gutterBottom>Evidence Base</Typography>
+                    <Paper
+                        variant="outlined"
+                        sx={{
+                            p: 2,
+                            borderRadius: 1,
+                            bgcolor: 'grey.50'
+                        }}
+                    >
                         {renderEvidenceBase(policy.evidence_base)}
-                    </div>
-                </div>
+                    </Paper>
+                </Box>
             )}
 
             {/* Stakeholders */}
             {policy.stakeholders && (
-                <div className="mb-6">
-                    <h3 className="text-lg font-medium mb-2">Key Stakeholders</h3>
-                    <div className="bg-gray-50 border border-gray-200 p-4 rounded-md">
+                <Box sx={{ mb: 3 }}>
+                    <Typography variant="h6" gutterBottom>Key Stakeholders</Typography>
+                    <Paper
+                        variant="outlined"
+                        sx={{
+                            p: 2,
+                            borderRadius: 1,
+                            bgcolor: 'grey.50'
+                        }}
+                    >
                         {renderStakeholders(policy.stakeholders)}
-                    </div>
-                </div>
+                    </Paper>
+                </Box>
             )}
 
             {/* Implementation Challenges */}
             {policy.implementation_challenges && (
-                <div className="mb-6">
-                    <h3 className="text-lg font-medium mb-2">Implementation Challenges</h3>
-                    <div className="bg-gray-50 border border-gray-200 p-4 rounded-md">
+                <Box sx={{ mb: 3 }}>
+                    <Typography variant="h6" gutterBottom>Implementation Challenges</Typography>
+                    <Paper
+                        variant="outlined"
+                        sx={{
+                            p: 2,
+                            borderRadius: 1,
+                            bgcolor: 'grey.50'
+                        }}
+                    >
                         {renderChallenges(policy.implementation_challenges)}
-                    </div>
-                </div>
+                    </Paper>
+                </Box>
             )}
-        </div>
+        </Paper>
     );
 }

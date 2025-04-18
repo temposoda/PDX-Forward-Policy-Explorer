@@ -1,7 +1,8 @@
-import './globals.css'
-import type { Metadata, Viewport } from 'next'
-import AnimationProvider from './providers/AnimationProvider';
+import './globals.css';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import { ColorModeProvider } from '@/app/components/ui/ColorModeProvider';
+import { Container } from '@mui/material';
 
 // Load Inter font with specific subsets
 const inter = Inter({
@@ -13,12 +14,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'PDX Forward Policy Explorer',
   description: 'Explore and filter proposed policies by policy area, expected cost, and budget impact.',
-}
+};
 
 export const viewport: Viewport = {
-  'width': 'device-width',
-  initialScale: 1
-}
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export default function RootLayout({
   children,
@@ -26,13 +27,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="bg-gray-50 font-sans">
-        <AnimationProvider>
-          <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 md:px-8 md:py-8">
+    <html suppressHydrationWarning lang="en" className={inter.variable}>
+      <body>
+        <ColorModeProvider>
+          <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 }, px: { xs: 2, md: 3 } }}>
             {children}
-          </main>
-        </AnimationProvider>
+          </Container>
+        </ColorModeProvider>
       </body>
     </html>
   );

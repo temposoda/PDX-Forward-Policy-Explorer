@@ -1,208 +1,75 @@
-@import "tailwindcss";
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem
-  }
-
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%
-  }
+/* Base styles */
+* {
+  box-sizing: border-box;
 }
 
-/* Improved text rendering for better legibility */
+html,
+body {
+  padding: 0;
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+/* Typography improvements */
 body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   letter-spacing: -0.01em;
-  color: #333333;
 }
 
-/* Typography improvements */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  letter-spacing: -0.025em;
-  line-height: 1.2;
-}
-
-p,
-li {
-  line-height: 1.6;
-}
-
-/* Base font size adjustments for better readability */
-html {
-  font-size: 16px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 17px;
-  }
-}
-
-/* Custom breakpoint for extra small screens */
-@layer utilities {
-  @variants responsive {
-    .xs\:inline {
-      display: inline;
-    }
-
-    .xs\:hidden {
-      display: none;
-    }
-
-    .xs\:flex {
-      display: flex;
-    }
-
-    .xs\:flex-row {
-      flex-direction: row;
-    }
-
-    .xs\:flex-col {
-      flex-direction: column;
-    }
-  }
-}
-
-/* Responsive padding and typography adjustments */
-@media (max-width: 640px) {
-  main {
-    padding: 0.75rem !important;
-  }
-
-  h1 {
-    font-size: 1.75rem !important;
-    line-height: 1.2 !important;
-  }
-
-  h2 {
-    font-size: 1.5rem !important;
-    line-height: 1.25 !important;
-  }
-
-  p {
-    font-size: 1rem !important;
-  }
-}
+/* We can let Material UI handle most styling */
+/* Focus states will be handled by Material UI */
 
 /* Custom scrollbar for dropdowns */
-.overflow-auto::-webkit-scrollbar {
+.MuiAutocomplete-listbox::-webkit-scrollbar {
   width: 8px;
 }
 
-.overflow-auto::-webkit-scrollbar-track {
+.MuiAutocomplete-listbox::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 10px;
 }
 
-.overflow-auto::-webkit-scrollbar-thumb {
+.MuiAutocomplete-listbox::-webkit-scrollbar-thumb {
   background: #d1d5db;
   border-radius: 10px;
 }
 
-.overflow-auto::-webkit-scrollbar-thumb:hover {
+.MuiAutocomplete-listbox::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
 
-/* Improved focus states for accessibility */
-*:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+/* Fade transition for pages */
+.page-transition-enter {
+  opacity: 0;
 }
 
-/* Policy card hover effect */
-.policy-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+.page-transition-enter-active {
+  opacity: 1;
+  transition: opacity 300ms;
 }
 
-.policy-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-color: #93c5fd;
+.page-transition-exit {
+  opacity: 1;
 }
 
-select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-position: right 0.75rem center;
-  background-repeat: no-repeat;
-  background-size: 16px;
-  padding-right: 2.5rem !important;
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
 }
 
-/* Hide default dropdown arrow in IE10+ */
-select::-ms-expand {
-  display: none;
+/* Highlighted text in search results */
+.highlight {
+  background-color: rgba(255, 235, 59, 0.5);
+  padding: 0 2px;
+  border-radius: 2px;
 }
 
-/* Ensure the MultiSelect chevron has the same positioning */
-.multi-select-chevron {
-  position: absolute;
-  right: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-/* Ensure consistent padding on dropdown buttons */
-.dropdown-button {
-  padding-right: 2.5rem !important;
-  position: relative;
+/* Dark mode support */
+.dark body {
+  background-color: #121212;
+  color: #f5f5f5;
 }

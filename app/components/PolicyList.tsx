@@ -5,7 +5,12 @@ import { Policy, DomainMap } from '@/app/lib/types';
 import { DomainId, DomainFilterMode } from '@/app/lib/constants';
 import FilterControls from '@/app/components/FilterControls';
 import PolicyCard from '@/app/components/PolicyCard';
-
+import {
+    Box,
+    Typography,
+    Grid,
+    Paper,
+} from '@mui/material';
 
 export default function PolicyList({
     policies,
@@ -49,53 +54,49 @@ export default function PolicyList({
         return matchesCost && matchesImpact && matchesDomain && matchesSearch;
     });
 
-    // Utility function for domain colors
-    const getDomainColor = (domain: DomainId): string => {
-        const colors: Record<Exclude<DomainId, "all">, string> = {
-            housing: "bg-pink-100 text-pink-800",
-            environment: "bg-green-100 text-green-800",
-            safety: "bg-yellow-100 text-yellow-800",
-            democracy: "bg-blue-100 text-blue-800",
-            "economic-development": "bg-orange-100 text-orange-800",
-            "infrastructure-and-transportation": "bg-indigo-100 text-indigo-800",
-            "social-services": "bg-purple-100 text-purple-800",
-            "public-health": "bg-red-100 text-red-800",
-        };
-
-        return (
-            colors[domain as Exclude<DomainId, "all">] || "bg-gray-100 text-gray-800"
-        );
-    };
-
     return (
-        <div>
+        <Box>
             <FilterControls />
 
             {/* Results counter */}
-            <div className="mb-5 text-base text-gray-600 font-medium">
+            <Typography
+                variant="subtitle1"
+                color="text.secondary"
+                sx={{ mb: 2.5, fontWeight: 500 }}
+            >
                 {filteredPolicies.length === 1
                     ? "1 policy found"
                     : `${filteredPolicies.length} policies found`}
-            </div>
+            </Typography>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            <Grid container spacing={3}>
                 {filteredPolicies.map((policy) => (
-                    <PolicyCard
-                        key={policy.policy_id}
-                        policy={policy}
-                        policyDomains={policyDomains[policy.policy_id] || []}
-                        searchQuery={searchQuery}
-                        getDomainColor={getDomainColor}
-                    />
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }} key={policy.policy_id}>
+                        <PolicyCard
+                            policy={policy}
+                            policyDomains={policyDomains[policy.policy_id] || []}
+                            searchQuery={searchQuery}
+                        />
+                    </Grid>
                 ))}
-            </div>
+            </Grid>
 
             {filteredPolicies.length === 0 && (
-                <div className="text-center py-12 px-4 text-gray-600 border border-gray-200 rounded-md bg-white shadow-sm">
-                    <p className="text-xl mb-3 font-medium">No policies found</p>
-                    <p className="text-base">Try adjusting your filters or search terms</p>
-                </div>
+                <Paper
+                    variant="outlined"
+                    sx={{
+                        textAlign: 'center',
+                        py: 6,
+                        px: 2,
+                        bgcolor: 'background.paper'
+                    }}
+                >
+                    <Typography variant="h6" gutterBottom>No policies found</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Try adjusting your filters or search terms
+                    </Typography>
+                </Paper>
             )}
-        </div>
+        </Box>
     );
 }

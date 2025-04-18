@@ -1,21 +1,24 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
+import { Fade } from '@mui/material';
 
 interface PageTransitionProps {
     children: ReactNode;
 }
 
 export default function PageTransition({ children }: PageTransitionProps) {
+    // We need to handle mounting for client-side transitions
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
+
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-        >
-            {children}
-        </motion.div>
+        <Fade in={mounted} timeout={300}>
+            <div>{children}</div>
+        </Fade>
     );
 }
